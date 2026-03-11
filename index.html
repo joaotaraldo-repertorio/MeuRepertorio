@@ -1,0 +1,1201 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Repertório Profissional - João</title>
+    <script src="dados.js"></script>
+    <style>
+        /* --- CORES --- */
+        :root {
+            --vermelho: #cc0000;
+            --verde-show: #28a745;
+            --azul-ativo: #004488;
+            --bg-body: #fdfdfd;
+            --bg-sidebar: #eee;
+            --bg-busca: #fff;
+            --bg-item: #eef4ff; 
+            --bg-hover: #d0d0d0;
+            --texto-padrao: #000;
+            --texto-azul: #0055aa;
+            --borda: #ccc;
+            --sombra: rgba(0,0,0,0.2);
+            --foco-teclado: #ff9800;
+            
+            --bg-ja-tocada: #8eb4e6; 
+            --texto-ja-tocada: #002255; 
+            --bg-alerta-sertanejo: #ffe5e5; 
+            --texto-alerta-sertanejo: #cc0000; 
+            
+            --bg-medley: #FFCC66;
+            --texto-medley: #000;
+        }
+
+        body.dark-mode {
+            --bg-body: #121212;
+            --bg-sidebar: #1e1e1e;
+            --bg-busca: #2d2d2d;
+            --bg-item: #2a2a2a;
+            --bg-hover: #444;
+            --texto-padrao: #e0e0e0;
+            --texto-azul: #8ab4f8;
+            --azul-ativo: #4a90e2;
+            --borda: #444;
+            --sombra: rgba(0,0,0,0.5);
+            
+            --bg-ja-tocada: #3a5f8a; 
+            --texto-ja-tocada: #eef4ff;
+            --bg-alerta-sertanejo: #4a1a1a; 
+            --texto-alerta-sertanejo: #ff8888;
+            
+            --bg-medley: #b38000;
+            --texto-medley: #fff;
+        }
+
+        /* GERAL */
+        body { font-family: 'Verdana', sans-serif; margin: 0; display: flex; height: 100vh; background: var(--bg-body); color: var(--texto-padrao); transition: background 0.3s, color 0.3s; overflow: hidden; }
+        
+        #sidebar { width: 320px; background: var(--bg-sidebar); border-right: 2px solid var(--borda); display: flex; flex-direction: column; flex-shrink: 0; }
+        
+        #painel-topo { display: flex; gap: 4px; padding: 8px; background: var(--bg-sidebar); border-bottom: 1px solid var(--borda); }
+        .box-info { flex: 1; padding: 5px; border-radius: 6px; border: 2px solid var(--borda); background: var(--bg-busca); text-align: center; cursor: pointer; display: flex; flex-direction: column; justify-content: center; align-items: center; transition: all 0.2s; min-width: 0; }
+        .box-info:hover { filter: brightness(0.95); }
+        .info-label { font-size: 0.65em; font-weight: bold; color: #888; text-transform: uppercase; margin-bottom: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; width: 100%; }
+        .info-valor { font-size: 1.0em; font-weight: bold; color: var(--texto-padrao); font-family: monospace; }
+        .box-info.rodando { border-color: var(--verde-show); background-color: rgba(40, 167, 69, 0.1); }
+        .box-info.rodando .info-valor { color: var(--verde-show); }
+
+        #busca-container { padding: 10px; background: var(--bg-sidebar); border-bottom: 1px solid var(--borda); display: flex; flex-direction: column; gap: 8px; }
+        .linha-busca { display: flex; align-items: center; width: 100%; }
+        .input-wrapper { position: relative; flex-grow: 1; display: flex; align-items: center; }
+        .input-sidebar { width: 100%; padding: 8px; padding-right: 60px; box-sizing: border-box; border: 1px solid var(--borda); border-radius: 20px; font-size: 14px; outline: none; font-family: 'Verdana', sans-serif; background: var(--bg-busca); color: var(--texto-padrao); }
+        
+        #btnTema { background: none; border: none; font-size: 20px; cursor: pointer; padding: 5px; margin-left: 8px; border-radius: 50%; transition: transform 0.2s; flex-shrink: 0; }
+        #btnTema:hover { transform: scale(1.1); background: var(--bg-hover); }
+        
+        .btn-limpar-input { position: absolute; right: 10px; cursor: pointer; color: #999; font-weight: bold; font-size: 16px; display: none; background: none; border: none; }
+        .btn-mic-input { position: absolute; right: 32px; cursor: pointer; color: #555; font-size: 16px; background: none; border: none; transition: transform 0.2s, color 0.2s; }
+        .btn-mic-input:hover { transform: scale(1.2); color: var(--azul-ativo); }
+        .btn-mic-input.ouvindo { color: var(--vermelho); animation: pulse 1s infinite; }
+        @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.2); } 100% { transform: scale(1); } }
+        
+        #menuList { flex-grow: 1; overflow-y: auto; padding: 10px; }
+        
+        #rodape-sidebar { padding: 6px; display: grid; grid-template-columns: 1fr 1fr; gap: 4px; border-top: 1px solid var(--borda); background: var(--bg-sidebar); }
+        .btn-acao-rodape { width: 100%; padding: 6px 2px; font-size: 0.65em; font-weight: bold; cursor: pointer; border: 1px solid var(--borda); border-radius: 4px; background: var(--bg-busca); color: var(--texto-padrao); transition: all 0.2s; font-family: 'Verdana', sans-serif; text-align: center; white-space: nowrap; display: flex; align-items: center; justify-content: center; }
+        .btn-acao-rodape:hover { filter: brightness(0.95); transform: translateY(-1px); }
+        
+        .btn-sincronizar { background: #e0f7fa; color: #006064; border-color: #00bcd4; }
+        body.dark-mode .btn-sincronizar { background: #004d40; color: #e0f7fa; border-color: #00acc1; }
+
+        .btn-edicao { background: #ddd; color: #555; }
+        .btn-edicao.edicao-ativa { background: #ffe0b2; color: #d84315; border-color: #ff9800; box-shadow: inset 0 0 5px rgba(255,152,0,0.5); }
+        body.dark-mode .btn-edicao { background: #333; color: #aaa; border-color: #555; }
+        body.dark-mode .btn-edicao.edicao-ativa { background: #4e342e; color: #ffcc80; border-color: #ff9800; box-shadow: inset 0 0 5px rgba(255,152,0,0.5); }
+
+        .pasta-titulo { background: var(--bg-hover); padding: 9px; font-weight: bold; cursor: pointer; display: block; margin-top: 5px; border-radius: 8px; font-size: 0.85em; text-transform: uppercase; transition: background 0.1s; border-left: 4px solid transparent; color: var(--texto-padrao); outline: none; }
+        .pasta-titulo:hover { background-color: var(--borda); transform: translateX(2px); border-left: 4px solid var(--vermelho); }
+        .pasta-titulo:focus { border-left: 4px solid var(--foco-teclado); background-color: var(--borda); }
+
+        .subpasta-titulo { background: var(--bg-busca); padding: 7px 15px; font-weight: normal; cursor: pointer; display: block; margin-top: 2px; border-bottom: 1px solid var(--borda); font-size: 0.8em; border-radius: 4px; transition: background 0.1s; color: var(--texto-padrao); outline: none; }
+        .subpasta-titulo:hover { background-color: var(--bg-hover); }
+
+        .musicas-da-pasta { display: none; margin-left: 10px; border-left: 2px solid var(--texto-azul); }
+        .musicas-da-pasta.ativo { display: block; }
+        
+        .item-musica { padding: 9px 12px; cursor: pointer; border-bottom: 1px solid var(--borda); font-size: 13px; line-height: 1.3; color: var(--texto-azul); background-color: var(--bg-item); font-weight: 500; margin-bottom: 2px; border-radius: 4px; transition: background 0.1s, transform 0.1s; outline: none; }
+        .item-musica:hover { filter: brightness(0.95); transform: translateX(2px); }
+        .artista-label { font-size: 0.75em; color: #888; display: block; font-weight: normal; margin-top: 2px; }
+        
+        .item-musica[draggable="true"] { cursor: grab; }
+        .item-musica.arrastando { opacity: 0.5; border: 2px dashed var(--vermelho); background-color: #ffe5e5; cursor: grabbing; }
+        body.dark-mode .item-musica.arrastando { background-color: #4a1a1a; }
+        
+        .item-separador { background-color: #ffffff !important; border: 1px solid var(--borda) !important; min-height: 28px !important; opacity: 1 !important; padding: 4px 10px !important; margin: 6px 2px !important; border-radius: 6px; box-shadow: inset 0 1px 3px rgba(0,0,0,0.05); transition: all 0.2s; color: #C00000 !important; font-weight: bold !important; font-size: 15px !important; text-align: center; display: flex; align-items: center; justify-content: center; text-transform: uppercase; letter-spacing: 1px; }
+        body.dark-mode .item-separador { background-color: #2a2a2a !important; border-color: #444 !important; box-shadow: inset 0 1px 3px rgba(0,0,0,0.2); color: #ff5555 !important; }
+        .item-separador:hover { filter: brightness(0.98) !important; transform: translateY(-1px) !important; }
+        .item-separador.arrastando { opacity: 0.8 !important; border: 2px dashed var(--vermelho) !important; background-color: #ffe5e5 !important; }
+        
+        .item-sertanejo-base { background-color: var(--bg-alerta-sertanejo); color: var(--texto-alerta-sertanejo); border-left: 4px solid var(--vermelho); }
+        .item-sertanejo-base .artista-label { color: #a00; }
+        body.dark-mode .item-sertanejo-base .artista-label { color: #ffaaaa; }
+
+        .item-medley-head { background-color: var(--bg-medley); color: var(--texto-medley); border-left: 4px solid #ff9800; }
+        .item-medley-head .artista-label { color: inherit; opacity: 0.7; }
+        
+        .item-medley-copy { background-color: var(--bg-medley); color: var(--texto-medley); border-left: 4px solid #ff9800; }
+        .item-medley-copy .artista-label { color: inherit; opacity: 0.7; }
+
+        .ja-tocada { background-color: var(--bg-ja-tocada) !important; color: var(--texto-ja-tocada) !important; border-left: 4px solid var(--azul-ativo) !important; }
+        .ja-tocada .artista-label { color: #001133 !important; }
+        body.dark-mode .ja-tocada .artista-label { color: #bbddff !important; }
+
+        .musica-ativa { background-color: var(--azul-ativo) !important; color: #fff !important; transform: translateX(5px); border-left: 4px solid var(--foco-teclado) !important; }
+        .musica-ativa .artista-label { color: #ddd !important; }
+        
+        .item-musica:focus { outline: 2px solid var(--foco-teclado) !important; outline-offset: -2px; }
+
+        #conteudo { flex-grow: 1; padding: 5px 5px; overflow-y: auto; display: flex; flex-direction: column; align-items: center; position: relative; }
+        .cabecalho-musica { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; border-bottom: 3px solid var(--vermelho); margin-bottom: 5px; padding-bottom: 5px; width: 100%; max-width: 1400px; }
+        .titulo-txt { color: var(--vermelho); text-transform: uppercase; font-weight: bold; font-size: 2.0em; margin: 0; letter-spacing: -1px; }
+        .controles-topo { display: flex; align-items: center; gap: 6px; }
+        .grupo-controle { display: flex; align-items: center; gap: 3px; background: var(--bg-sidebar); padding: 1px 6px; border-radius: 12px; border: 1px solid var(--borda); height: 24px; }
+        .label-controle { font-size: 0.55em; font-weight: bold; text-transform: uppercase; color: #888; margin-right: 2px; }
+        .tom-display { color: var(--vermelho); font-weight: bold; font-size: 1.1em; min-width: 25px; text-align: center; line-height: 1; }
+        
+        .btn-tom { width: 18px; height: 18px; cursor: pointer; font-weight: bold; background: var(--vermelho); color: white; border: none; border-radius: 50%; font-size: 0.75em; display: flex; align-items: center; justify-content: center; box-shadow: 0 1px 2px var(--sombra); font-family: 'Verdana', sans-serif; }
+        .btn-tom:active { transform: scale(0.95); }
+        .btn-visual { background: #555; }
+        body.dark-mode .btn-visual { background: #777; }
+        .btn-editor { background: #ff9800; } 
+        #relogio { font-size: 1.0em; font-weight: bold; color: var(--texto-padrao); background: var(--bg-sidebar); padding: 2px 6px; border-radius: 5px; border: 1px solid var(--borda); }
+
+        .cifra-container { width: 100%; max-width: 1400px; display: flex; flex-direction: column; text-align: center; white-space: pre-wrap; padding-bottom: 50px; }
+        .linha-visual { min-height: 1.2em; }
+        .chord { color: var(--vermelho); }
+        .bloco-negrito { font-weight: bold; color: inherit; } 
+        .modo-italico { font-style: italic; color: inherit; }
+        .texto-vermelho { color: var(--vermelho); }
+        .texto-pequeno { font-size: 0.85em; color: inherit; }
+
+        #overlay-editor { display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background-color: var(--bg-body); z-index: 2000; flex-direction: column; padding: 20px; box-sizing: border-box; }
+        #overlay-editor.ativo { display: flex; }
+        #toolbar-editor { display: flex; gap: 10px; align-items: center; justify-content: center; padding-bottom: 15px; border-bottom: 2px solid var(--vermelho); margin-bottom: 15px; flex-wrap: wrap; }
+        .btn-acao-editor { height: 40px; padding: 0 20px; border-radius: 20px; border: none; cursor: pointer; font-weight: bold; font-family: 'Verdana'; font-size: 1em; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 6px rgba(0,0,0,0.1); transition: transform 0.1s; }
+        .btn-acao-editor:hover { transform: translateY(-2px); filter: brightness(1.1); }
+        .btn-negrito { background: #000; color: #fff; }
+        .btn-italico { background: #555; color: #fff; font-style: italic; }
+        .btn-vermelho { background: var(--vermelho); color: #fff; }
+        .btn-cifra { background: #9c27b0; color: #fff; } 
+        .btn-copiar { background: #4caf50; color: #fff; border: 2px solid #388E3C; }
+        .btn-cancelar { background: #999; color: #fff; }
+        #textarea-editor { flex-grow: 1; width: 100%; max-width: 1400px; margin: 0 auto; font-family: 'Verdana', monospace; font-size: 1.4em; line-height: 1.5; padding: 20px; background: var(--bg-busca); color: var(--texto-padrao); border: 2px dashed #ccc; border-radius: 10px; outline: none; resize: none; white-space: pre; overflow-y: auto; }
+        #textarea-editor:focus { border-color: var(--vermelho); }
+
+        #toast-aviso { display: none; position: fixed; bottom: 20px; right: 20px; background-color: #222; color: #fff; padding: 12px 20px; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.4); z-index: 3000; align-items: center; gap: 15px; font-size: 1em; border-left: 5px solid var(--vermelho); animation: slideIn 0.3s ease-out; }
+        #toast-aviso button { background: none; border: none; color: #fff; font-size: 1.2em; font-weight: bold; cursor: pointer; }
+        @keyframes slideIn { from { transform: translateY(100%); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+
+        /* =========================================================
+           CSS RESPONSIVO (GAVETA DESLIZANTE V2 - 100% SEGURO)
+           ========================================================= */
+        #btn-menu-mobile { 
+            display: none; 
+            position: fixed; 
+            top: 10px; 
+            left: 10px; 
+            z-index: 900; 
+            background: var(--vermelho); 
+            color: white; 
+            border: none; 
+            border-radius: 5px; 
+            padding: 10px 15px; 
+            font-size: 18px; 
+            font-weight: bold;
+            cursor: pointer; 
+            box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+            user-select: none; /* Impede de "selecionar o texto" ao clicar */
+        }
+
+        #overlay-mobile { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.6); z-index: 990; }
+        #overlay-mobile.ativo { display: block; }
+
+        @media (max-width: 850px) {
+            #btn-menu-mobile { display: block; }
+            
+            #sidebar { 
+                position: fixed; 
+                left: 0; 
+                top: 0; 
+                bottom: 0; 
+                z-index: 1000; 
+                box-shadow: 2px 0 15px rgba(0,0,0,0.5); 
+                /* Aqui está o truque de ouro: Esconde puxando pra esquerda */
+                transform: translateX(-105%); 
+                transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            }
+            
+            /* Quando a classe "aberto" entra, ele volta pra posição 0 */
+            #sidebar.aberto { transform: translateX(0); }
+
+            #conteudo { padding-top: 60px; }
+            .cabecalho-musica { flex-direction: column; align-items: center; text-align: center; }
+            .controles-topo { flex-wrap: wrap; justify-content: center; gap: 8px; margin-top: 10px; }
+            .btn-tom { width: 34px; height: 34px; font-size: 1.2em; } 
+            .grupo-controle { height: 38px; padding: 2px 10px; border-radius: 19px; }
+            .label-controle { font-size: 0.65em; }
+            .tom-display { min-width: 35px; font-size: 1.3em; }
+            .btn-acao-rodape { padding: 12px 2px; font-size: 0.75em; }
+            #relogio { display: none; }
+        }
+    </style>
+</head>
+<body>
+
+<button id="btn-menu-mobile" onclick="event.preventDefault(); toggleMenuMobile();">☰ MENU</button>
+<div id="overlay-mobile" onclick="toggleMenuMobile()"></div>
+
+<div id="sidebar">
+    <div id="painel-topo">
+        <div id="box-cronometro" class="box-info" onclick="alternarCronometro()">
+            <div class="info-label">Tempo</div>
+            <div class="info-valor" id="txt-cronometro">00:00:00</div>
+        </div>
+        <div id="box-contador" class="box-info" onclick="limparHistorico()">
+            <div class="info-label">Selecionadas</div>
+            <div class="info-valor" id="txt-contador">0</div>
+        </div>
+        <div id="box-total" class="box-info" style="cursor: default;">
+            <div class="info-label">Total</div>
+            <div class="info-valor" id="txt-total">0</div>
+        </div>
+    </div>
+
+    <div id="busca-container">
+        <div class="linha-busca" id="div-busca-musica">
+            <div class="input-wrapper">
+                <input type="text" class="input-sidebar" id="inputBusca" placeholder="🎵 Buscar Música..." onkeyup="agendarBusca()">
+                <button id="btnMicMusica" class="btn-mic-input" onclick="iniciarVoz('musica')" title="Falar">🎤</button>
+                <button id="btnLimparMusica" class="btn-limpar-input" onclick="limparBusca('musica')">×</button>
+            </div>
+            <button id="btnTema" onclick="alternarTema()" title="Alternar Modo Noturno">🌗</button>
+        </div>
+        
+        <div class="linha-busca" id="div-busca-pasta">
+            <div class="input-wrapper">
+                <input type="text" class="input-sidebar" id="inputBuscaPasta" placeholder="📂 Buscar Pasta..." onkeyup="filtrarPastas()">
+                <button id="btnMicPasta" class="btn-mic-input" onclick="iniciarVoz('pasta')" title="Falar">🎤</button>
+                <button id="btnLimparPasta" class="btn-limpar-input" onclick="limparBusca('pasta')">×</button>
+            </div>
+        </div>
+    </div>
+    
+    <div id="menuList"></div>
+
+    <div id="rodape-sidebar">
+        <button class="btn-acao-rodape" onclick="exportarConfig()" title="Baixar Backup">💾 EXPORTAR</button>
+        <button class="btn-acao-rodape" onclick="importarConfig()" title="Carregar Backup">📂 IMPORTAR</button>
+        <button class="btn-acao-rodape btn-sincronizar" onclick="sincronizarComExcel()" title="Puxar ordem nova do Excel">🔄 SINC. EXCEL</button>
+        <button class="btn-acao-rodape btn-edicao" id="btnModoEdicao" onclick="alternarModoEdicao()" title="Travar/Destravar a lista para organizar">🔒 EDIÇÃO: OFF</button>
+    </div>
+</div>
+
+<div id="conteudo">
+    <div id="visor" style="width: 100%; display: flex; flex-direction: column; align-items: center;">
+        <h1 style="color: var(--vermelho); margin-top: 30px;">Selecione uma música</h1>
+    </div>
+    <div id="area-cifra" class="cifra-container"></div>
+</div>
+
+<div id="toast-aviso">
+    <span id="toast-msg">Mensagem</span>
+    <button onclick="fecharAviso()">×</button>
+</div>
+
+<div id="overlay-editor">
+    <div id="toolbar-editor">
+        <span style="font-weight:bold; color:var(--texto-padrao); margin-right:10px;">EDITOR:</span>
+        <button class="btn-acao-editor btn-negrito" onmousedown="event.preventDefault()" onclick="aplicarTag('(N)')">(N)</button>
+        <button class="btn-acao-editor btn-italico" onmousedown="event.preventDefault()" onclick="aplicarTag('[I]')">[I]</button>
+        <button class="btn-acao-editor btn-vermelho" onmousedown="event.preventDefault()" onclick="aplicarTag('V')">"V"</button>
+        <button class="btn-acao-editor btn-cifra" onmousedown="event.preventDefault()" onclick="aplicarTag('<c>')">♫ Cifra</button>
+        <div style="width:2px; height:30px; background:#ccc; margin:0 10px;"></div>
+        <button class="btn-acao-editor btn-copiar" onclick="finalizarEdicao()">📋 COPIAR E SAIR</button>
+        <button class="btn-acao-editor btn-cancelar" onclick="cancelarEdicao()">❌ Cancelar</button>
+    </div>
+    <textarea id="textarea-editor" spellcheck="false"></textarea>
+</div>
+
+<script>
+    // --- LÓGICA DA GAVETA MOBILE ---
+    function toggleMenuMobile() {
+        document.getElementById('sidebar').classList.toggle('aberto');
+        document.getElementById('overlay-mobile').classList.toggle('ativo');
+    }
+    
+    function fecharMenuMobile() {
+        document.getElementById('sidebar').classList.remove('aberto');
+        document.getElementById('overlay-mobile').classList.remove('ativo');
+    }
+
+    let musicaAtual = null;
+    let semitonsOffset = 0;
+    let tamFonteAtual = 1.25; 
+    let espacamentoAtual = 1.2;
+    let timeoutAviso;
+    let segundosShow = 0;
+    let cronometroRodando = false;
+    let intervaloCronometro = null;
+    let musicasTocadasUnicas = new Set(); 
+    let itensNavegaveis = []; 
+    let timerBusca = null;
+    let ultimaAcaoEditor = null;
+    
+    let modoEdicao = false; 
+    let itemArrastado = null; 
+    let scrollSpeedY = 0;
+    let scrollInterval = null;
+    let lastDragUpdate = 0; 
+
+    const notas = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
+    
+    const categoriasFixas = [
+        "ANOS 60", "ANOS 70", "ANOS 80", "ARRASTA PÉ", "AXÉ", "BASE", 
+        "BOLERO", "BOSSA", "BREGA", "BRINCADEIRA", "CARNAVAL", 
+        "FESTA JUNINA", "FORRÓ", "GUARÂNIA", "INTERNACIONAL", 
+        "MÚSICA - TODAS", "REGGAE", "SAMBA", "SELEÇÃO SERTANEJA", 
+        "SERTANEJO", "VALSA", "XOTE"
+    ];
+
+    try {
+        const historicoSalvo = localStorage.getItem('historico_joao_show');
+        if (historicoSalvo) {
+            const arraySalvo = JSON.parse(historicoSalvo);
+            arraySalvo.forEach(uid => musicasTocadasUnicas.add(uid));
+        }
+    } catch (e) { console.error("Erro ao carregar histórico", e); }
+
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'F5') { localStorage.removeItem('historico_joao_show'); }
+    });
+
+    function alternarModoEdicao() {
+        modoEdicao = !modoEdicao;
+        const btn = document.getElementById('btnModoEdicao');
+        const itensArrastaveis = document.querySelectorAll('[data-arrastavel="true"]');
+
+        if (modoEdicao) {
+            btn.innerHTML = "🔓 EDIÇÃO: ON";
+            btn.classList.add('edicao-ativa');
+            itensArrastaveis.forEach(el => el.setAttribute('draggable', 'true'));
+            mostrarAviso("Modo Edição LIGADO. Você já pode organizar as pastas.");
+        } else {
+            btn.innerHTML = "🔒 EDIÇÃO: OFF";
+            btn.classList.remove('edicao-ativa');
+            itensArrastaveis.forEach(el => el.removeAttribute('draggable'));
+            mostrarAviso("Modo Edição DESLIGADO. Lista travada e segura para o show.");
+        }
+    }
+
+    function limparHistorico() {
+        if (confirm("Deseja ZERAR o histórico de músicas selecionadas?")) {
+            musicasTocadasUnicas.clear();
+            localStorage.removeItem('historico_joao_show');
+            document.getElementById('txt-contador').innerText = "0";
+            renderizarMenu(); 
+        }
+    }
+
+    function sincronizarComExcel() {
+        if (confirm("Isso vai apagar a ordem que você arrastou no site e puxar a ordem atualizada do seu arquivo Excel. Deseja continuar?")) {
+            let keysToRemove = [];
+            for (let i = 0; i < localStorage.length; i++) {
+                let key = localStorage.key(i);
+                if (key && key.startsWith('ordem_pasta_')) {
+                    keysToRemove.push(key);
+                }
+            }
+            keysToRemove.forEach(k => localStorage.removeItem(k));
+            location.reload();
+        }
+    }
+
+    function exportarConfig() {
+        let backup = {};
+        for (let i = 0; i < localStorage.length; i++) {
+            let key = localStorage.key(i);
+            if (key === 'historico_joao_show' || key.startsWith('ordem_pasta_') || key === 'tema') {
+                backup[key] = localStorage.getItem(key);
+            }
+        }
+        let blob = new Blob([JSON.stringify(backup)], {type: "application/json"});
+        let url = URL.createObjectURL(blob);
+        let a = document.createElement('a');
+        a.href = url;
+        let dataHora = new Date().toISOString().replace(/[:.]/g, '-').substring(0,19);
+        a.download = `repertorio_backup_${dataHora}.json`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+        mostrarAviso("Configurações Exportadas com Sucesso!");
+    }
+
+    function importarConfig() {
+        let fileInput = document.createElement('input');
+        fileInput.type = 'file';
+        fileInput.accept = '.json';
+        fileInput.onchange = e => {
+            let file = e.target.files[0];
+            if (!file) return;
+            let reader = new FileReader();
+            reader.onload = ev => {
+                try {
+                    let backup = JSON.parse(ev.target.result);
+                    for (let key in backup) {
+                        localStorage.setItem(key, backup[key]);
+                    }
+                    alert("Backup importado com sucesso! O programa será recarregado.");
+                    location.reload(); 
+                } catch (err) { alert("Erro ao importar. O arquivo selecionado não é um backup válido."); }
+            };
+            reader.readAsText(file);
+        };
+        fileInput.click();
+    }
+
+    function removerAcentos(str) {
+        if (!str) return ""; 
+        return String(str).normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+    }
+
+    document.getElementById('textarea-editor').addEventListener('keydown', function(e) {
+        if (e.key === 'F4') { e.preventDefault(); if (ultimaAcaoEditor) aplicarTag(ultimaAcaoEditor); }
+    });
+
+    function agendarBusca() { clearTimeout(timerBusca); timerBusca = setTimeout(filtrarMusicas, 300); }
+
+    document.getElementById('inputBusca').addEventListener('keydown', function(e) {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            if (document.activeElement.classList.contains('item-musica') && !document.activeElement.classList.contains('item-separador')) {
+                document.activeElement.click();
+            } else {
+                const primeiraVisivel = Array.from(document.querySelectorAll('.item-musica:not(.item-separador)')).find(item => item.style.display === 'block');
+                if (primeiraVisivel) { primeiraVisivel.click(); this.blur(); }
+            }
+        }
+        if (e.key === 'ArrowDown') { 
+            e.preventDefault(); 
+            atualizarNavegacao(); 
+            if(itensNavegaveis.length > 0) {
+                itensNavegaveis[0].focus({ preventScroll: true });
+                itensNavegaveis[0].scrollIntoView({ block: 'nearest' });
+            }
+        }
+    });
+
+    document.getElementById('inputBuscaPasta').addEventListener('keydown', function(e) {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            let termo = removerAcentos(this.value);
+            if(!termo) return;
+            const todasVisiveis = Array.from(document.querySelectorAll('.pasta-titulo, .subpasta-titulo')).filter(el => el.offsetParent !== null);
+            const alvo = todasVisiveis.find(el => removerAcentos(el.innerText).includes(termo));
+            if (alvo) {
+                alvo.click(); this.blur();
+                setTimeout(() => {
+                    let containerPasta = alvo.parentElement.querySelector('.musicas-da-pasta');
+                    if (containerPasta) {
+                        let primeiraMusica = containerPasta.querySelector('.item-musica:not(.item-separador)');
+                        if (primeiraMusica) { 
+                            primeiraMusica.focus({ preventScroll: true }); 
+                            primeiraMusica.scrollIntoView({ block: 'nearest' });
+                            atualizarNavegacao(); 
+                        }
+                    }
+                }, 150);
+            }
+        }
+    });
+
+    function atualizarNavegacao() {
+        const rawItems = document.querySelectorAll('#menuList .pasta-titulo, #menuList .subpasta-titulo, #menuList .ativo .item-musica:not(.item-separador)');
+        itensNavegaveis = Array.from(rawItems).filter(el => el.offsetParent !== null);
+    }
+
+    document.addEventListener('keydown', (e) => {
+        if (['INPUT', 'TEXTAREA'].includes(document.activeElement.tagName)) return;
+        if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+            e.preventDefault();
+            if (itensNavegaveis.length === 0) atualizarNavegacao();
+            const current = document.activeElement;
+            let idx = itensNavegaveis.indexOf(current);
+            if (idx === -1 && itensNavegaveis.length > 0) idx = 0;
+            
+            if (e.key === 'ArrowDown') {
+                let nextIdx = idx + 1;
+                if (nextIdx >= itensNavegaveis.length) nextIdx = itensNavegaveis.length - 1; 
+                if (itensNavegaveis[nextIdx]) {
+                    itensNavegaveis[nextIdx].focus({ preventScroll: true }); 
+                    itensNavegaveis[nextIdx].scrollIntoView({ block: 'nearest' });
+                }
+            } else {
+                let prevIdx = idx - 1;
+                if (prevIdx < 0) prevIdx = 0; 
+                if (itensNavegaveis[prevIdx]) {
+                    itensNavegaveis[prevIdx].focus({ preventScroll: true });
+                    itensNavegaveis[prevIdx].scrollIntoView({ block: 'nearest' });
+                }
+            }
+        }
+        if (e.key === 'Enter') {
+            const el = document.activeElement;
+            if (el.classList.contains('pasta-titulo') || el.classList.contains('subpasta-titulo') || (el.classList.contains('item-musica') && !el.classList.contains('item-separador'))) {
+                e.preventDefault(); el.click();
+            }
+        }
+    });
+
+    function alternarCronometro() {
+        const box = document.getElementById('box-cronometro');
+        if (cronometroRodando) {
+            clearInterval(intervaloCronometro); cronometroRodando = false; box.classList.remove('rodando');
+        } else {
+            cronometroRodando = true; box.classList.add('rodando');
+            intervaloCronometro = setInterval(() => { segundosShow++; atualizarDisplayCronometro(); }, 1000);
+        }
+    }
+
+    function atualizarDisplayCronometro() {
+        const h = Math.floor(segundosShow / 3600).toString().padStart(2, '0');
+        const m = Math.floor((segundosShow % 3600) / 60).toString().padStart(2, '0');
+        const s = (segundosShow % 60).toString().padStart(2, '0');
+        document.getElementById('txt-cronometro').innerText = `${h}:${m}:${s}`;
+    }
+
+    function mostrarAviso(msg) {
+        const toast = document.getElementById('toast-aviso');
+        document.getElementById('toast-msg').innerText = msg;
+        toast.style.display = 'flex';
+        clearTimeout(timeoutAviso);
+        timeoutAviso = setTimeout(fecharAviso, 10000); 
+    }
+
+    function fecharAviso() {
+        document.getElementById('toast-aviso').style.display = 'none';
+        document.getElementById('inputBusca').value = ""; document.getElementById('inputBuscaPasta').value = "";
+        document.getElementById('btnLimparMusica').style.display = 'none'; document.getElementById('btnLimparPasta').style.display = 'none';
+        filtrarMusicas(); filtrarPastas();
+    }
+
+    function iniciarVoz(tipo) {
+        if (!('webkitSpeechRecognition' in window)) { alert("Seu navegador não suporta reconhecimento de voz. Use o Chrome."); return; }
+        const recognition = new webkitSpeechRecognition();
+        recognition.lang = 'pt-BR'; recognition.interimResults = false; recognition.maxAlternatives = 1;
+        const btnID = (tipo === 'musica') ? 'btnMicMusica' : 'btnMicPasta';
+        const inputID = (tipo === 'musica') ? 'inputBusca' : 'inputBuscaPasta';
+        const btnEl = document.getElementById(btnID);
+        recognition.onstart = function() { btnEl.classList.add('ouvindo'); };
+        recognition.onend = function() { btnEl.classList.remove('ouvindo'); };
+        recognition.onresult = function(event) {
+            let transcricao = event.results[0][0].transcript.trim();
+            const campo = document.getElementById(inputID);
+            let comandoAbrir = false;
+            if (tipo === 'musica') {
+                const palavrasChave = ["mostrar", "abrir", "ver", "tocar"];
+                let primeiraPalavra = transcricao.split(" ")[0].toLowerCase();
+                if (palavrasChave.includes(primeiraPalavra)) {
+                    comandoAbrir = true; transcricao = transcricao.substring(primeiraPalavra.length).trim();
+                }
+            }
+            campo.value = transcricao;
+            if (tipo === 'musica') {
+                filtrarMusicas();
+                if (comandoAbrir) {
+                    setTimeout(() => {
+                        let primeiroItem = document.querySelector('.item-musica:not(.item-separador)[style*="block"]');
+                        if (primeiroItem) { primeiroItem.click(); } else { mostrarAviso("Música não encontrada."); }
+                    }, 200);
+                }
+            } else { filtrarPastas(); }
+        };
+        recognition.start();
+    }
+
+    function formatarTexto(texto, tipo) {
+        let miolo = texto.trim();
+        if (!miolo) return texto; 
+        if (tipo === '(N)') return (miolo.startsWith('(') && miolo.endsWith(')')) ? miolo.slice(1, -1) : `(${miolo})`;
+        if (tipo === '[I]') return (miolo.startsWith('[') && miolo.endsWith(']')) ? miolo.slice(1, -1) : `[${miolo}]`;
+        if (tipo === 'V') return (miolo.startsWith('"') && miolo.endsWith('"')) ? miolo.slice(1, -1) : `"${miolo}"`;
+        if (tipo === '<c>') { if (miolo.startsWith('<c>')) return miolo.substring(3); return '<c>' + miolo; }
+        return texto;
+    }
+
+    function aplicarTag(tipo) {
+        ultimaAcaoEditor = tipo;
+        const txt = document.getElementById('textarea-editor');
+        const start = txt.selectionStart; const end = txt.selectionEnd; const textoTotal = txt.value;
+        if (start === end) {
+            let codigo = "";
+            if(tipo === '(N)') codigo = "()"; else if(tipo === '[I]') codigo = "[]"; else if(tipo === 'V') codigo = '""'; else if(tipo === '<c>') codigo = "<c>";
+            document.execCommand("insertText", false, codigo);
+            let offset = (tipo === '<c>') ? 3 : 1;
+            txt.setSelectionRange(start + offset, start + offset); return;
+        }
+        let selecao = textoTotal.substring(start, end);
+        if (selecao.includes('\n')) {
+            let linhas = selecao.split('\n');
+            let novasLinhas = linhas.map(linha => {
+                let matchInicio = linha.match(/^\s*/); let prefixo = matchInicio ? matchInicio[0] : "";
+                let matchFim = linha.match(/\s*$/); let sufixo = matchFim ? matchFim[0] : "";
+                let conteudo = linha.trim();
+                if(!conteudo) return linha; 
+                if (tipo === '<c>') {
+                    let limpo = conteudo; 
+                    if (limpo.startsWith('<c>')) return prefixo + limpo.substring(3) + sufixo;
+                    return prefixo + '<c>' + limpo + sufixo;
+                }
+                return prefixo + formatarTexto(conteudo, tipo) + sufixo;
+            });
+            document.execCommand("insertText", false, novasLinhas.join('\n'));
+        } else {
+            let matchInicio = selecao.match(/^\s*/); let prefixo = matchInicio ? matchInicio[0] : "";
+            let matchFim = selecao.match(/\s*$/); let sufixo = matchFim ? matchFim[0] : "";
+            let miolo = selecao.trim(); let novoMiolo = formatarTexto(miolo, tipo);
+            document.execCommand("insertText", false, prefixo + novoMiolo + sufixo);
+        }
+    }
+
+    function abrirEditor() {
+        if(!musicaAtual) return;
+        const overlay = document.getElementById('overlay-editor');
+        const txt = document.getElementById('textarea-editor');
+        txt.value = musicaAtual.corpo; txt.style.fontSize = `${tamFonteAtual}em`; txt.style.lineHeight = `${espacamentoAtual}`;
+        overlay.classList.add('ativo'); txt.focus();
+    }
+
+    function finalizarEdicao() {
+        const novoCorpo = document.getElementById('textarea-editor').value;
+        navigator.clipboard.writeText(novoCorpo).then(() => {
+            alert("COPIADO! Cole no Excel (CTRL+V)."); musicaAtual.corpo = novoCorpo; fecharEditor(); exibir(); 
+        });
+    }
+
+    function cancelarEdicao() { fecharEditor(); }
+    function fecharEditor() { document.getElementById('overlay-editor').classList.remove('ativo'); }
+
+    function ajustarFonte(delta) { tamFonteAtual += delta; if (tamFonteAtual < 0.5) tamFonteAtual = 0.5; atualizarEstiloContainer(); }
+    function ajustarEspacamento(delta) { espacamentoAtual += delta; if (espacamentoAtual < 0.8) espacamentoAtual = 0.8; atualizarEstiloContainer(); }
+    function atualizarEstiloContainer() {
+        const container = document.getElementById('area-cifra');
+        if (container) { container.style.fontSize = `${tamFonteAtual}em`; container.style.lineHeight = `${espacamentoAtual}`; }
+    }
+
+    function alternarTema() {
+        document.body.classList.toggle('dark-mode'); localStorage.setItem('tema', document.body.classList.contains('dark-mode') ? 'dark' : 'light');
+    }
+    if (localStorage.getItem('tema') === 'dark') document.body.classList.add('dark-mode');
+
+    function atualizarRelogio() {
+        const agora = new Date(); const el = document.getElementById('relogio');
+        if(el) el.innerText = `${String(agora.getHours()).padStart(2,'0')}:${String(agora.getMinutes()).padStart(2,'0')}`;
+    }
+    setInterval(atualizarRelogio, 1000);
+
+    document.getElementById('menuList').addEventListener('dragover', e => {
+        if (!itemArrastado) return;
+        let menuListEl = document.getElementById('menuList');
+        let rect = menuListEl.getBoundingClientRect();
+        let margem = 100; 
+        
+        if (e.clientY < rect.top + margem) {
+            scrollSpeedY = -25;
+        } else if (e.clientY > rect.bottom - margem) {
+            scrollSpeedY = 25;
+        } else {
+            scrollSpeedY = 0;
+        }
+
+        if (scrollSpeedY !== 0 && !scrollInterval) {
+            scrollInterval = setInterval(() => {
+                menuListEl.scrollTop += scrollSpeedY;
+            }, 30);
+        } else if (scrollSpeedY === 0 && scrollInterval) {
+            clearInterval(scrollInterval);
+            scrollInterval = null;
+        }
+    });
+
+    document.addEventListener('dragend', () => {
+        if(scrollInterval) clearInterval(scrollInterval);
+        scrollInterval = null;
+        scrollSpeedY = 0;
+    });
+
+    function getDragAfterElement(container, y) {
+        const draggableElements = [...container.querySelectorAll('.item-musica:not(.arrastando)')];
+        return draggableElements.reduce((closest, child) => {
+            const box = child.getBoundingClientRect();
+            const offset = y - box.top - box.height / 2;
+            if (offset < 0 && offset > closest.offset) {
+                return { offset: offset, element: child };
+            } else { return closest; }
+        }, { offset: Number.NEGATIVE_INFINITY }).element;
+    }
+
+    function salvarOrdemPasta(nomePasta, container) {
+        const items = container.querySelectorAll('.item-musica');
+        const ordem = Array.from(items).map(el => el.getAttribute('data-uid'));
+        localStorage.setItem('ordem_pasta_' + nomePasta, JSON.stringify(ordem));
+    }
+
+    function aplicarInteligenciaMedley(objItensBase) {
+        let freq = {};
+        objItensBase.forEach(item => { 
+            let tomItem = String(item.mObj.tomOriginal || "").toUpperCase();
+            if (tomItem !== "PAUSA") {
+                freq[item.uid] = (freq[item.uid] || 0) + 1; 
+            }
+        });
+
+        for(let i=0; i<objItensBase.length; i++) {
+            let tomItem = String(objItensBase[i].mObj.tomOriginal || "").toUpperCase();
+            if(tomItem !== "PAUSA" && freq[objItensBase[i].uid] > 1) {
+                let prev = "", next = "\uffff"; 
+                for(let j=i-1; j>=0; j--) { 
+                    if(String(objItensBase[j].mObj.tomOriginal || "").toUpperCase() !== "PAUSA" && freq[objItensBase[j].uid] === 1) { 
+                        prev = removerAcentos(objItensBase[j].mObj.titulo); break; 
+                    } 
+                }
+                for(let j=i+1; j<objItensBase.length; j++) { 
+                    if(String(objItensBase[j].mObj.tomOriginal || "").toUpperCase() !== "PAUSA" && freq[objItensBase[j].uid] === 1) { 
+                        next = removerAcentos(objItensBase[j].mObj.titulo); break; 
+                    } 
+                }
+                
+                let tituloAtual = removerAcentos(objItensBase[i].mObj.titulo);
+                let score = (tituloAtual >= prev ? 1 : 0) + (tituloAtual <= next ? 1 : 0);
+                
+                if (tituloAtual.length > 0) {
+                    let firstLetter = tituloAtual.charAt(0);
+                    if (prev && prev.length > 0 && prev.charAt(0) === firstLetter) score += 0.5;
+                    if (next && next !== "\uffff" && next.charAt(0) === firstLetter) score += 0.5;
+                    
+                    let penalty = 0;
+                    if (prev && prev.length > 0) penalty += Math.abs(tituloAtual.charCodeAt(0) - prev.charCodeAt(0));
+                    if (next && next !== "\uffff" && next.length > 0) penalty += Math.abs(next.charCodeAt(0) - tituloAtual.charCodeAt(0));
+                    
+                    score -= (penalty * 0.001);
+                }
+                objItensBase[i].score = score;
+            }
+        }
+
+        let origIndices = {};
+        objItensBase.forEach((item, index) => {
+            let tomItem = String(item.mObj.tomOriginal || "").toUpperCase();
+            if(tomItem !== "PAUSA" && freq[item.uid] > 1) {
+                if(origIndices[item.uid] === undefined) {
+                    origIndices[item.uid] = index;
+                } else {
+                    if(item.score > objItensBase[origIndices[item.uid]].score) {
+                        origIndices[item.uid] = index;
+                    }
+                }
+            }
+        });
+
+        objItensBase.forEach((item, index) => {
+            let tomItem = String(item.mObj.tomOriginal || "").toUpperCase();
+            if (tomItem === "PAUSA") {
+                item.is_copy = false;
+            } else {
+                item.is_copy = (freq[item.uid] > 1 && origIndices[item.uid] !== index);
+            }
+        });
+
+        objItensBase.forEach((item, index) => {
+            let tomItem = String(item.mObj.tomOriginal || "").toUpperCase();
+            if (tomItem !== "PAUSA" && item.is_copy && index > 0 && !objItensBase[index-1].is_copy && String(objItensBase[index-1].mObj.tomOriginal || "").toUpperCase() !== "PAUSA") {
+                objItensBase[index-1].is_medley_head = true;
+            }
+        });
+    }
+
+    function recalcularMedleyBase(container) {
+        let items = Array.from(container.querySelectorAll('.item-musica'));
+        let data = items.map(el => {
+            return { el: el, uid: el.getAttribute('data-uid'), titulo: el.getAttribute('data-titulo'), tom: el.getAttribute('data-tom') };
+        });
+
+        let freq = {};
+        data.forEach(item => { 
+            if (item.tom !== "PAUSA") freq[item.uid] = (freq[item.uid] || 0) + 1; 
+        });
+
+        data.forEach((item, i) => {
+            item.el.classList.remove('item-medley-copy', 'item-medley-head'); 
+            if (item.tom !== "PAUSA" && freq[item.uid] > 1) {
+                let prev = "", next = "\uffff"; 
+                for(let j=i-1; j>=0; j--) { 
+                    if(data[j].tom !== "PAUSA" && freq[data[j].uid] === 1) { prev = removerAcentos(data[j].titulo); break; } 
+                }
+                for(let j=i+1; j<data.length; j++) { 
+                    if(data[j].tom !== "PAUSA" && freq[data[j].uid] === 1) { next = removerAcentos(data[j].titulo); break; } 
+                }
+                
+                let tituloAtual = removerAcentos(item.titulo);
+                let score = (tituloAtual >= prev ? 1 : 0) + (tituloAtual <= next ? 1 : 0);
+                
+                if (tituloAtual.length > 0) {
+                    let firstLetter = tituloAtual.charAt(0);
+                    if (prev && prev.length > 0 && prev.charAt(0) === firstLetter) score += 0.5;
+                    if (next && next !== "\uffff" && next.charAt(0) === firstLetter) score += 0.5;
+                    
+                    let penalty = 0;
+                    if (prev && prev.length > 0) penalty += Math.abs(tituloAtual.charCodeAt(0) - prev.charCodeAt(0));
+                    if (next && next !== "\uffff" && next.length > 0) penalty += Math.abs(next.charCodeAt(0) - tituloAtual.charCodeAt(0));
+                    
+                    score -= (penalty * 0.001);
+                }
+                item.score = score;
+            }
+        });
+
+        let origIndices = {};
+        data.forEach((item, index) => {
+            if(item.tom !== "PAUSA" && freq[item.uid] > 1) {
+                if(origIndices[item.uid] === undefined) {
+                    origIndices[item.uid] = index;
+                } else {
+                    if(item.score > data[origIndices[item.uid]].score) {
+                        origIndices[item.uid] = index;
+                    }
+                }
+            }
+        });
+
+        data.forEach((item, index) => {
+            if (item.tom === "PAUSA") {
+                item.is_copy = false;
+            } else {
+                item.is_copy = (freq[item.uid] > 1 && origIndices[item.uid] !== index);
+            }
+        });
+
+        data.forEach((item, index) => {
+            if (item.tom !== "PAUSA" && item.is_copy && index > 0 && !data[index-1].is_copy && data[index-1].tom !== "PAUSA") {
+                data[index-1].el.classList.add('item-medley-head');
+            }
+            if (item.is_copy) {
+                item.el.classList.add('item-medley-copy');
+            }
+        });
+    }
+
+    function criarNodoPasta(pai, nome, filtro, ehSub = false) {
+        let d = document.createElement('div');
+        d.innerHTML = `<span class="${ehSub?'subpasta-titulo':'pasta-titulo'}" onclick="interagirPasta(this)" tabindex="0">📁 ${nome}</span>`;
+        let dM = document.createElement('div'); dM.className = "musicas-da-pasta";
+        if(nome.toUpperCase() === "MÚSICA - TODAS") dM.id = "lista-todas-musicas";
+        
+        let ehElegivelArrastar = (nome.toUpperCase() !== "MÚSICA - TODAS");
+
+        if (ehElegivelArrastar) {
+            dM.addEventListener('dragover', e => {
+                e.preventDefault();
+                if (!itemArrastado) return;
+                
+                let agora = Date.now();
+                if (agora - lastDragUpdate < 40) return;
+                lastDragUpdate = agora;
+
+                const afterElement = getDragAfterElement(dM, e.clientY);
+                if (afterElement == null) { dM.appendChild(itemArrastado); } 
+                else { dM.insertBefore(itemArrastado, afterElement); }
+            });
+        }
+
+        let listaFiltrada = musicas.filter(m => {
+            if(filtro.toUpperCase() === "MÚSICA - TODAS") return true;
+            return String(m.tags || "").toUpperCase().split(';').map(t=>t.trim()).includes(filtro.toUpperCase());
+        });
+        
+        let objItensBase = [];
+
+        if (nome.toUpperCase() === "BASE") {
+            let pausaCount = 0;
+            listaFiltrada.forEach(m => {
+                let isPausa = (String(m.tomOriginal || "").toUpperCase() === "PAUSA");
+                let uidSeguro = String(m.titulo || "").toLowerCase() + "|||" + String(m.artista || "").toLowerCase();
+                if (isPausa) {
+                    pausaCount++;
+                    uidSeguro += "_PAUSA_" + pausaCount; 
+                }
+                objItensBase.push({ mObj: m, uid: uidSeguro });
+            });
+        } else {
+            listaFiltrada.sort((a,b)=>String(a.titulo || "").localeCompare(String(b.titulo || "")));
+            const unicas = new Set();
+            listaFiltrada = listaFiltrada.filter(m => {
+                const isPausa = (String(m.tomOriginal || "").toUpperCase() === "PAUSA");
+                const idUnico = String(m.titulo || "").toLowerCase() + "|" + String(m.artista || "").toLowerCase();
+                if(unicas.has(idUnico) && !isPausa) return false; 
+                if(!isPausa) unicas.add(idUnico); 
+                return true;
+            });
+            
+            let pausaCount = 0;
+            listaFiltrada.forEach(m => {
+                let isPausa = (String(m.tomOriginal || "").toUpperCase() === "PAUSA");
+                let uidSeguro = String(m.titulo || "").toLowerCase() + "|||" + String(m.artista || "").toLowerCase();
+                if (isPausa) {
+                    pausaCount++;
+                    uidSeguro += "_PAUSA_" + pausaCount; 
+                }
+                objItensBase.push({ mObj: m, uid: uidSeguro });
+            });
+        }
+
+        if (ehElegivelArrastar) {
+            let ordemSalva = localStorage.getItem('ordem_pasta_' + nome.toUpperCase());
+            if (ordemSalva) {
+                try {
+                    let orderArray = JSON.parse(ordemSalva);
+                    if(Array.isArray(orderArray)) {
+                        let pool = [...objItensBase];
+                        let sortedBase = [];
+                        
+                        for (let savedUid of orderArray) {
+                            let index = pool.findIndex(item => item.uid === savedUid);
+                            if (index !== -1) {
+                                sortedBase.push(pool.splice(index, 1)[0]);
+                            }
+                        }
+                        
+                        for (let newItem of pool) {
+                            sortedBase.push(newItem);
+                        }
+                        objItensBase = sortedBase;
+                    }
+                } catch(e) {}
+            }
+        }
+
+        if (nome.toUpperCase() === "BASE") {
+            aplicarInteligenciaMedley(objItensBase);
+        }
+        
+        objItensBase.forEach(item => {
+            let m = item.mObj;
+            let isSeparador = (String(m.tomOriginal || "").toUpperCase() === "PAUSA");
+            
+            let i = document.createElement('div'); 
+            i.className = "item-musica"; 
+            i.setAttribute('tabindex', '0');
+            
+            const safeID = btoa(unescape(encodeURIComponent(String(m.titulo || "")))).replace(/[/+=]/g, "");
+            i.setAttribute('data-id', safeID); 
+            i.setAttribute('data-artista', String(m.artista || "").toLowerCase()); 
+            i.setAttribute('data-uid', item.uid);
+            i.setAttribute('data-titulo', String(m.titulo || "")); 
+            i.setAttribute('data-tom', isSeparador ? "PAUSA" : String(m.tomOriginal || ""));
+            
+            if (isSeparador) {
+                i.classList.add('item-separador');
+                let tituloSep = String(m.titulo || "").trim();
+                if (tituloSep === "" || tituloSep === "x x x" || tituloSep === "---" || tituloSep === "Sem Título") {
+                    i.innerHTML = "";
+                } else {
+                    i.innerHTML = tituloSep;
+                }
+            } else {
+                const textoBusca = removerAcentos(String(m.titulo || "") + " " + String(m.artista || "")); 
+                i.setAttribute('data-busca', textoBusca);
+                i.innerHTML = `${m.titulo}<span class="artista-label">${m.artista}</span>`;
+                
+                if (nome.toUpperCase() === "BASE") {
+                    let tagsDaMusica = String(m.tags || "").toUpperCase().split(';').map(t => t.trim());
+                    if (tagsDaMusica.includes("SERTANEJO")) { i.classList.add('item-sertanejo-base'); }
+                    if (item.is_copy) { i.classList.add('item-medley-copy'); } 
+                    else if (item.is_medley_head) { i.classList.add('item-medley-head'); }
+                }
+                i.onclick = () => { marcarComoTocada(m, safeID); }; 
+            }
+
+            if (ehElegivelArrastar) {
+                i.setAttribute('data-arrastavel', 'true');
+                if (modoEdicao) {
+                    i.setAttribute('draggable', 'true');
+                }
+                
+                i.title = isSeparador ? "Ligue o Modo Edição para mover" : "Ligue o Modo Edição para reordenar";
+                
+                i.addEventListener('dragstart', (e) => {
+                    if (!modoEdicao) { e.preventDefault(); return; } 
+                    itemArrastado = i; i.classList.add('arrastando'); e.dataTransfer.effectAllowed = 'move';
+                });
+                i.addEventListener('dragend', () => {
+                    i.classList.remove('arrastando');
+                    itemArrastado = null;
+                    
+                    if (nome.toUpperCase() === "BASE") { recalcularMedleyBase(dM); }
+                    
+                    salvarOrdemPasta(nome.toUpperCase(), dM); 
+                    atualizarNavegacao(); 
+                });
+            }
+            dM.appendChild(i);
+        });
+        d.appendChild(dM); pai.appendChild(d);
+    }
+
+    function renderizarMenu() {
+        const menu = document.getElementById('menuList');
+        if(typeof musicas === 'undefined') return;
+        
+        musicas.forEach(m => {
+            let isPausa = (String(m.tomOriginal || "").toUpperCase() === "PAUSA");
+            if(!m.titulo) m.titulo = isPausa ? "" : "Sem Título";
+            if(!m.artista) m.artista = isPausa ? "" : "Desconhecido";
+            if(!m.tags) m.tags = "BASE"; 
+            if(!m.tomOriginal) m.tomOriginal = "C";
+            if(!m.corpo) m.corpo = "";
+            m.titulo = String(m.titulo); m.artista = String(m.artista); m.tags = String(m.tags); m.corpo = String(m.corpo); m.tomOriginal = String(m.tomOriginal);
+        });
+
+        document.getElementById('txt-total').innerText = musicas.filter(m => String(m.tomOriginal).toUpperCase() !== "PAUSA").length;
+        document.getElementById('txt-contador').innerText = musicasTocadasUnicas.size;
+        
+        const tagsUnicas = new Set();
+        musicas.forEach(m => { String(m.tags).split(';').forEach(t => { if(t.trim()) tagsUnicas.add(t.trim().toUpperCase()); }); });
+        
+        const temBase = Array.from(tagsUnicas).includes("BASE");
+        const estilos = Array.from(tagsUnicas).filter(t => categoriasFixas.includes(t) && t !== "BASE").sort();
+        const cantores = Array.from(tagsUnicas).filter(t => !categoriasFixas.includes(t)).sort();
+        
+        menu.innerHTML = "";
+        if (temBase) criarNodoPasta(menu, "BASE", "BASE");
+        if(cantores.length > 0) {
+            let divCM = document.createElement('div');
+            divCM.innerHTML = `<span class="pasta-titulo" onclick="interagirPasta(this)" tabindex="0">📁 CANTORES</span>`;
+            let divSub = document.createElement('div'); divSub.className = "musicas-da-pasta";
+            cantores.forEach(art => criarNodoPasta(divSub, art, art, true));
+            divCM.appendChild(divSub); menu.appendChild(divCM);
+        }
+        estilos.forEach(cat => criarNodoPasta(menu, cat, cat));
+        atualizarNavegacao();
+        restaurarCoresTocadas();
+    }
+    
+    function restaurarCoresTocadas() {
+        document.querySelectorAll('.item-musica:not(.item-separador)').forEach(el => {
+            const uid = el.getAttribute('data-uid');
+            if(uid && musicasTocadasUnicas.has(uid)) {
+                el.classList.add('ja-tocada');
+                el.classList.remove('item-sertanejo-base'); 
+            }
+        });
+    }
+
+    function interagirPasta(el) {
+        el.nextElementSibling.classList.toggle('ativo'); limparBusca('pasta'); document.getElementById('toast-aviso').style.display = 'none'; 
+        setTimeout(() => { el.scrollIntoView({ behavior: 'smooth', block: 'start' }); atualizarNavegacao(); }, 100);
+    }
+
+    function marcarComoTocada(mObj, id) {
+        musicaAtual = mObj; semitonsOffset = 0; tamFonteAtual = 1.25; espacamentoAtual = 1.2;
+        const uidSeguro = String(mObj.titulo || "").toLowerCase() + "|||" + String(mObj.artista || "").toLowerCase();
+        
+        if (!musicasTocadasUnicas.has(uidSeguro)) {
+            musicasTocadasUnicas.add(uidSeguro); document.getElementById('txt-contador').innerText = musicasTocadasUnicas.size;
+            localStorage.setItem('historico_joao_show', JSON.stringify(Array.from(musicasTocadasUnicas)));
+        }
+        exibir();
+        document.querySelectorAll('.item-musica:not(.item-separador)').forEach(el => el.classList.remove('musica-ativa'));
+        document.querySelectorAll('.item-musica:not(.item-separador)').forEach(el => {
+            if(el.getAttribute('data-uid') === uidSeguro) {
+                el.classList.add('ja-tocada'); el.classList.add('musica-ativa'); el.classList.remove('item-sertanejo-base'); 
+            }
+        });
+        fecharAviso(); atualizarNavegacao();
+        
+        if (window.innerWidth <= 850) {
+            fecharMenuMobile();
+        }
+    }
+
+    function transporAcorde(ac, s) {
+        return ac.replace(/[A-G][#b]?/g, m => {
+            let nB = m.charAt(0); if(m.includes('#')) nB += '#';
+            if(m.includes('b')) nB = notas[(notas.indexOf(m.charAt(0)) - 1 + 12) % 12];
+            return notas[(notas.indexOf(nB) + s + 12) % 12];
+        });
+    }
+
+    function processarLetra(txt, s) {
+        return txt.split('\n').map(l => {
+            let forcarCifra = l.includes('<c>'); l = l.replace('<c>', ''); l = l.replace(/\{([^}]*)\}/g, '<span class="texto-pequeno">$1</span>');
+            let linhaSemHtml = l.replace(/<[^>]*>/g, '');
+            if (linhaSemHtml.length === 0) return '<div class="linha-visual">&nbsp;</div>';
+            let linhaTeste = linhaSemHtml.trim().replace(/[\(\)\[\]"]/g, '');
+            let isChordLine = (linhaTeste.length > 0 && linhaTeste.match(/^([A-G][#b]?(m|maj|dim|aug|sus|add|7|9|11|13|6|4|2|5|º|°|\+)*(\/[A-G][#b]?)?(\s+|$|\W))+$/));
+            if (isChordLine || forcarCifra) { l = l.replace(/[A-G][#b]?(m|maj|dim|aug|sus|add|7|9|11|13|6|4|2)*(\/[A-G][#b]?)?/g, m => transporAcorde(m, s)); }
+            l = l.replace(/"([^"]+)"/g, '<span class="texto-vermelho">$1</span>');
+            l = l.replace(/\(([^)]+)\)/g, '<span class="bloco-negrito">$1</span>');
+            l = l.replace(/\[([^\]]+)\]/g, '<span class="modo-italico">$1</span>');
+            if (isChordLine || forcarCifra) { return `<div class="chord">${l}</div>`; } else { return `<div>${l}</div>`; }
+        }).join('');
+    }
+
+    function exibir() {
+        const v = document.getElementById('visor'); const divVisual = document.getElementById('area-cifra');
+        if(!musicaAtual) { v.innerHTML = `<h1 style="color: var(--vermelho); margin-top: 30px;">Selecione uma música</h1>`; return; }
+        const tE = transporAcorde(String(musicaAtual.tomOriginal || "C"), semitonsOffset);
+        v.innerHTML = `
+            <div class="cabecalho-musica">
+                <h1 class="titulo-txt">${musicaAtual.titulo || "Sem Título"}</h1>
+                <div class="controles-topo">
+                    <div class="grupo-controle"><span class="label-controle">Tom</span><button class="btn-tom" onclick="mudarTom(-1)">-</button><div class="tom-display">${tE}</div><button class="btn-tom" onclick="mudarTom(1)">+</button></div>
+                    <div class="grupo-controle"><span class="label-controle">Letra</span><button class="btn-tom btn-visual" onclick="ajustarFonte(-0.1)">-</button><button class="btn-tom btn-visual" onclick="ajustarFonte(0.1)">+</button></div>
+                    <div class="grupo-controle"><span class="label-controle">Linha</span><button class="btn-tom btn-visual" onclick="ajustarEspacamento(-0.1)">-</button><button class="btn-tom btn-visual" onclick="ajustarEspacamento(0.1)">+</button></div>
+                    <div class="grupo-controle"><span class="label-controle">EDITAR</span><button class="btn-tom btn-editor" onclick="abrirEditor()">✎</button></div>
+                    <div id="relogio">--:--</div>
+                </div>
+            </div>
+        `;
+        divVisual.innerHTML = processarLetra(String(musicaAtual.corpo || ""), semitonsOffset); atualizarRelogio(); atualizarEstiloContainer(); 
+    }
+
+    function mudarTom(v) { semitonsOffset += v; exibir(); }
+
+    function filtrarMusicas() { 
+        let termo = removerAcentos(document.getElementById('inputBusca').value); let btn = document.getElementById('btnLimparMusica');
+        btn.style.display = (termo.length > 0) ? "block" : "none";
+        let listaTodas = document.getElementById('lista-todas-musicas'); if (termo.length > 0 && listaTodas) listaTodas.classList.add('ativo');
+        let encontrou = false; const menu = document.getElementById('menuList'); menu.style.display = 'none'; 
+        const items = document.querySelectorAll('.item-musica:not(.item-separador)');
+        for (let i = 0; i < items.length; i++) {
+            let item = items[i]; let texto = item.getAttribute('data-busca');
+            if (texto.includes(termo)) { item.style.display = "block"; encontrou = true; } else { item.style.display = "none"; }
+        }
+        menu.style.display = 'block';
+        if (termo.length > 0 && !encontrou) { mostrarAviso("Música não encontrada."); } else { document.getElementById('toast-aviso').style.display = 'none'; }
+        atualizarNavegacao();
+    }
+
+    function filtrarPastas() {
+        let termo = removerAcentos(document.getElementById('inputBuscaPasta').value); let btn = document.getElementById('btnLimparPasta');
+        btn.style.display = (termo.length > 0) ? "block" : "none";
+        const menu = document.getElementById('menuList'); menu.style.display = 'none'; 
+        let pastasPrincipais = menu.children; let encontrou = false;
+        for (let pasta of pastasPrincipais) {
+            let spanTitulo = pasta.querySelector('.pasta-titulo'); if(!spanTitulo) continue;
+            let nomePasta = spanTitulo.innerText; let mostrarPasta = false;
+            if (nomePasta.toUpperCase().includes("CANTORES")) {
+                let divSub = pasta.querySelector('.musicas-da-pasta');
+                if (divSub) {
+                    let subpastas = divSub.children; let algumCantorVisivel = false;
+                    for (let sub of subpastas) {
+                        let spanSub = sub.querySelector('.subpasta-titulo');
+                        if (spanSub) {
+                            if (removerAcentos(spanSub.innerText).includes(termo)) { sub.style.display = "block"; algumCantorVisivel = true; } else { sub.style.display = "none"; }
+                        }
+                    }
+                    if (algumCantorVisivel || termo === "") { mostrarPasta = true; if(termo !== "") divSub.classList.add('ativo'); }
+                }
+            } else { if (removerAcentos(nomePasta).includes(termo)) { mostrarPasta = true; } }
+            if (mostrarPasta) encontrou = true; pasta.style.display = mostrarPasta ? "block" : "none";
+        }
+        menu.style.display = 'block'; 
+        if (termo.length > 0 && !encontrou) { mostrarAviso("Pasta não encontrada."); } else { document.getElementById('toast-aviso').style.display = 'none'; }
+        atualizarNavegacao();
+    }
+
+    function limparBusca(tipo) { fecharAviso(); }
+    window.onload = renderizarMenu;
+</script>
+</body>
+</html>
