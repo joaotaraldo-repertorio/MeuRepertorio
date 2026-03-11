@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Repertório Profissional - João</title>
+     <link rel="manifest" href="manifest.json">
     <script src="dados.js"></script>
     <style>
         /* --- CORES --- */
@@ -1195,6 +1196,14 @@
     }
 
     function limparBusca(tipo) { fecharAviso(); }
+// --- LIGAR O COFRE OFFLINE (SERVICE WORKER) ---
+    if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+            navigator.serviceWorker.register('./sw.js')
+                .then(registration => console.log('Cofre Offline ativado com sucesso!'))
+                .catch(err => console.log('Erro no Cofre Offline: ', err));
+        });
+    }
     window.onload = renderizarMenu;
 </script>
 </body>
