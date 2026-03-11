@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Repertório Profissional - João</title>
-     <link rel="manifest" href="manifest.json">
     <script src="dados.js"></script>
     <style>
         /* --- CORES --- */
@@ -195,7 +194,7 @@
             font-weight: bold;
             cursor: pointer; 
             box-shadow: 0 2px 5px rgba(0,0,0,0.3);
-            user-select: none; /* Impede de "selecionar o texto" ao clicar */
+            user-select: none;
         }
 
         #overlay-mobile { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.6); z-index: 990; }
@@ -203,7 +202,6 @@
 
         @media (max-width: 850px) {
             #btn-menu-mobile { display: block; }
-            
             #sidebar { 
                 position: fixed; 
                 left: 0; 
@@ -211,14 +209,10 @@
                 bottom: 0; 
                 z-index: 1000; 
                 box-shadow: 2px 0 15px rgba(0,0,0,0.5); 
-                /* Aqui está o truque de ouro: Esconde puxando pra esquerda */
                 transform: translateX(-105%); 
                 transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             }
-            
-            /* Quando a classe "aberto" entra, ele volta pra posição 0 */
             #sidebar.aberto { transform: translateX(0); }
-
             #conteudo { padding-top: 60px; }
             .cabecalho-musica { flex-direction: column; align-items: center; text-align: center; }
             .controles-topo { flex-wrap: wrap; justify-content: center; gap: 8px; margin-top: 10px; }
@@ -308,7 +302,6 @@
 </div>
 
 <script>
-    // --- LÓGICA DA GAVETA MOBILE ---
     function toggleMenuMobile() {
         document.getElementById('sidebar').classList.toggle('aberto');
         document.getElementById('overlay-mobile').classList.toggle('ativo');
@@ -338,6 +331,12 @@
     let scrollInterval = null;
     let lastDragUpdate = 0; 
 
+    // Variáveis para detectar o deslize (Swipe)
+    let touchStartX = 0;
+    let touchEndX = 0;
+    let touchStartY = 0;
+    let touchEndY = 0;
+
     const notas = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
     
     const categoriasFixas = [
@@ -359,6 +358,54 @@
     document.addEventListener('keydown', function(e) {
         if (e.key === 'F5') { localStorage.removeItem('historico_joao_show'); }
     });
+
+    // --- MÁGICA 4: DETECÇÃO DE SWIPE (DESLIZE DE TELA) ---
+    const areaConteudo = document.getElementById('conteudo');
+
+    areaConteudo.addEventListener('touchstart', e => {
+        touchStartX = e.changedTouches[0].screenX;
+        touchStartY = e.changedTouches[0].screenY;
+    }, {passive: true});
+
+    areaConteudo.addEventListener('touchend', e => {
+        touchEndX = e.changedTouches[0].screenX;
+        touchEndY = e.changedTouches[0].screenY;
+        handleSwipe();
+    }, {passive: true});
+
+    function handleSwipe() {
+        if (!musicaAtual) return; // Só navega se já tiver uma música aberta na tela
+        
+        const deltaX = touchEndX - touchStartX;
+        const deltaY = touchEndY - touchStartY;
+        
+        // Verifica se o usuário puxou de lado e não pra cima/baixo (rolar a letra)
+        if (Math.abs(deltaX) > Math.abs(deltaY) && Math.abs(deltaX) > 60) {
+            if (deltaX < 0) {
+                // Puxou da direita pra esquerda -> Próxima música
+                navegarMusicaSiblina('proxima');
+            } else {
+                // Puxou da esquerda pra direita -> Música anterior
+                navegarMusicaSiblina('anterior');
+            }
+        }
+    }
+
+    function navegarMusicaSiblina(direcao) {
+        const elementoAtual = document.querySelector('.musica-ativa');
+        if (!elementoAtual) return;
+
+        let irmao = (direcao === 'proxima') ? elementoAtual.nextElementSibling : elementoAtual.previousElementSibling;
+        
+        // Pula os separadores (pausas ou blocos vazios) até achar uma música de verdade
+        while (irmao && (!irmao.classList.contains('item-musica') || irmao.classList.contains('item-separador'))) {
+            irmao = (direcao === 'proxima') ? irmao.nextElementSibling : irmao.previousElementSibling;
+        }
+
+        if (irmao) {
+            irmao.click(); // Clica automaticamente na próxima música da lista!
+        }
+    }
 
     function alternarModoEdicao() {
         modoEdicao = !modoEdicao;
@@ -1196,7 +1243,9 @@
     }
 
     function limparBusca(tipo) { fecharAviso(); }
-// --- LIGAR O COFRE OFFLINE (SERVICE WORKER) ---
+    window.onload = renderizarMenu;
+
+    // --- LIGAR O COFRE OFFLINE (SERVICE WORKER) ---
     if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => {
             navigator.serviceWorker.register('./sw.js')
@@ -1204,7 +1253,6 @@
                 .catch(err => console.log('Erro no Cofre Offline: ', err));
         });
     }
-    window.onload = renderizarMenu;
 </script>
 </body>
 </html>
