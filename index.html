@@ -8,7 +8,9 @@
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="theme-color" content="#121212"> <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#121212">
+    
+    <link rel="manifest" href="manifest.json">
     <script src="dados.js"></script>
     <style>
         /* --- CORES --- */
@@ -84,7 +86,8 @@
         .btn-mic-input.ouvindo { color: var(--vermelho); animation: pulse 1s infinite; }
         @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.2); } 100% { transform: scale(1); } }
         
-        #menuList { flex-grow: 1; overflow-y: auto; padding: 10px; }
+        /* MUDANÇA DA V74: Flexbox para permitir teletransporte das pastas */
+        #menuList { flex-grow: 1; overflow-y: auto; padding: 10px; display: flex; flex-direction: column; }
         
         #rodape-sidebar { padding: 6px; display: grid; grid-template-columns: 1fr 1fr; gap: 4px; border-top: 1px solid var(--borda); background: var(--bg-sidebar); }
         .btn-acao-rodape { width: 100%; padding: 6px 2px; font-size: 0.65em; font-weight: bold; cursor: pointer; border: 1px solid var(--borda); border-radius: 4px; background: var(--bg-busca); color: var(--texto-padrao); transition: all 0.2s; font-family: 'Verdana', sans-serif; text-align: center; white-space: nowrap; display: flex; align-items: center; justify-content: center; }
@@ -181,21 +184,10 @@
         #toast-aviso button { background: none; border: none; color: #fff; font-size: 1.2em; font-weight: bold; cursor: pointer; }
         @keyframes slideIn { from { transform: translateY(100%); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
 
-        /* =========================================================
-           CSS RESPONSIVO (MÁGICA DO CELULAR/TABLET)
-           ========================================================= */
         #btn-menu-mobile { 
             display: none; position: fixed; top: 10px; left: 10px; z-index: 900; 
             background: var(--vermelho); color: white; border: none; border-radius: 5px; 
             padding: 10px 15px; font-size: 18px; font-weight: bold; cursor: pointer; 
-            box-shadow: 0 2px 5px rgba(0,0,0,0.3); user-select: none;
-        }
-
-        /* NOVO BOTÃO DE TELA CHEIA FORÇADA */
-        #btn-fullscreen-mobile {
-            display: none; position: fixed; top: 10px; right: 10px; z-index: 900;
-            background: #555; color: white; border: none; border-radius: 5px;
-            padding: 10px 15px; font-size: 18px; font-weight: bold; cursor: pointer;
             box-shadow: 0 2px 5px rgba(0,0,0,0.3); user-select: none;
         }
 
@@ -204,8 +196,6 @@
 
         @media (max-width: 850px) {
             #btn-menu-mobile { display: block; }
-            #btn-fullscreen-mobile { display: block; } /* Aparece só no celular */
-            
             #sidebar { 
                 position: fixed; left: 0; top: 0; bottom: 0; z-index: 1000; 
                 box-shadow: 2px 0 15px rgba(0,0,0,0.5); 
@@ -221,10 +211,8 @@
             .tom-display { min-width: 35px; font-size: 1.3em; }
             #relogio { display: none; }
             
-            /* --- A MÁGICA DA LIMPEZA (Esconde os botões que não usa no App) --- */
             .esconder-mobile { display: none !important; }
             #btnExportar, #btnSinc, #btnModoEdicao { display: none !important; }
-            /* Deixa o botão de Importar grandão, ocupando a barra toda */
             #rodape-sidebar { grid-template-columns: 1fr; }
             .btn-acao-rodape { padding: 15px 2px; font-size: 0.85em; }
         }
@@ -233,7 +221,6 @@
 <body>
 
 <button id="btn-menu-mobile" onclick="event.preventDefault(); toggleMenuMobile();">☰ MENU</button>
-<button id="btn-fullscreen-mobile" onclick="forcarTelaCheia()" title="Ativar Tela Cheia">[  ]</button>
 
 <div id="overlay-mobile" onclick="toggleMenuMobile()"></div>
 
@@ -309,26 +296,6 @@
 </div>
 
 <script>
-    // --- FUNÇÃO DA FORÇA BRUTA (TELA CHEIA JS) ---
-    function forcarTelaCheia() {
-        let elemento = document.documentElement;
-        if (!document.fullscreenElement && !document.webkitFullscreenElement) {
-            // Entrar em tela cheia
-            if (elemento.requestFullscreen) {
-                elemento.requestFullscreen();
-            } else if (elemento.webkitRequestFullscreen) { /* Safari / iOS / Chrome antigo */
-                elemento.webkitRequestFullscreen();
-            }
-        } else {
-            // Sair da tela cheia
-            if (document.exitFullscreen) {
-                document.exitFullscreen();
-            } else if (document.webkitExitFullscreen) {
-                document.webkitExitFullscreen();
-            }
-        }
-    }
-
     function toggleMenuMobile() {
         document.getElementById('sidebar').classList.toggle('aberto');
         document.getElementById('overlay-mobile').classList.toggle('ativo');
@@ -967,8 +934,11 @@
             });
         }
 
+        /* --- MÁGICA 1 DA V74: O filtro extermínio de PAUSAS --- */
         let listaFiltrada = musicas.filter(m => {
-            if(filtro.toUpperCase() === "MÚSICA - TODAS") return true;
+            let isPausa = (String(m.tomOriginal || "").toUpperCase() === "PAUSA");
+            // Se for a pasta Todas, ele joga a Pausa no lixo (retorna falso)!
+            if(filtro.toUpperCase() === "MÚSICA - TODAS") return !isPausa; 
             return String(m.tags || "").toUpperCase().split(';').map(t=>t.trim()).includes(filtro.toUpperCase());
         });
         
@@ -1240,17 +1210,34 @@
 
     function mudarTom(v) { semitonsOffset += v; exibir(); }
 
+    /* --- MÁGICA 2 DA V74: Teletransporte da Pasta na Busca --- */
     function filtrarMusicas() { 
-        let termo = removerAcentos(document.getElementById('inputBusca').value); let btn = document.getElementById('btnLimparMusica');
+        let termo = removerAcentos(document.getElementById('inputBusca').value); 
+        let btn = document.getElementById('btnLimparMusica');
         btn.style.display = (termo.length > 0) ? "block" : "none";
-        let listaTodas = document.getElementById('lista-todas-musicas'); if (termo.length > 0 && listaTodas) listaTodas.classList.add('ativo');
-        let encontrou = false; const menu = document.getElementById('menuList'); menu.style.display = 'none'; 
+        
+        let listaTodas = document.getElementById('lista-todas-musicas'); 
+        let menu = document.getElementById('menuList'); 
+        
+        if (termo.length > 0 && listaTodas) {
+            listaTodas.classList.add('ativo'); // Abre a pasta
+            let pastaWrapper = listaTodas.parentElement;
+            pastaWrapper.style.order = "-1"; // Teletransporta pro Topo
+            setTimeout(() => { menu.scrollTop = 0; }, 10); // Rola a tela pra cima pra você ver
+        } else if (listaTodas) {
+            let pastaWrapper = listaTodas.parentElement;
+            pastaWrapper.style.order = "0"; // Volta a pasta pro lugar normal se apagar a busca
+        }
+
+        let encontrou = false; 
+        menu.style.display = 'none'; 
         const items = document.querySelectorAll('.item-musica:not(.item-separador)');
         for (let i = 0; i < items.length; i++) {
             let item = items[i]; let texto = item.getAttribute('data-busca');
             if (texto.includes(termo)) { item.style.display = "block"; encontrou = true; } else { item.style.display = "none"; }
         }
-        menu.style.display = 'block';
+        menu.style.display = 'flex'; // Religa o menu
+        
         if (termo.length > 0 && !encontrou) { mostrarAviso("Música não encontrada."); } else { document.getElementById('toast-aviso').style.display = 'none'; }
         atualizarNavegacao();
     }
@@ -1278,7 +1265,7 @@
             } else { if (removerAcentos(nomePasta).includes(termo)) { mostrarPasta = true; } }
             if (mostrarPasta) encontrou = true; pasta.style.display = mostrarPasta ? "block" : "none";
         }
-        menu.style.display = 'block'; 
+        menu.style.display = 'flex'; 
         if (termo.length > 0 && !encontrou) { mostrarAviso("Pasta não encontrada."); } else { document.getElementById('toast-aviso').style.display = 'none'; }
         atualizarNavegacao();
     }
