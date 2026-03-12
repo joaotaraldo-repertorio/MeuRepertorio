@@ -8,7 +8,9 @@
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="theme-color" content="#121212"> <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#121212">
+    
+    <link rel="manifest" href="manifest.json">
     <script src="dados.js"></script>
     <style>
         /* --- CORES --- */
@@ -191,20 +193,11 @@
             box-shadow: 0 2px 5px rgba(0,0,0,0.3); user-select: none;
         }
 
-        /* NOVO BOTÃO DE TELA CHEIA FORÇADA */
-        #btn-fullscreen-mobile {
-            display: none; position: fixed; top: 10px; right: 10px; z-index: 900;
-            background: #555; color: white; border: none; border-radius: 5px;
-            padding: 10px 15px; font-size: 18px; font-weight: bold; cursor: pointer;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.3); user-select: none;
-        }
-
         #overlay-mobile { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.6); z-index: 990; }
         #overlay-mobile.ativo { display: block; }
 
         @media (max-width: 850px) {
             #btn-menu-mobile { display: block; }
-            #btn-fullscreen-mobile { display: block; } /* Aparece só no celular */
             
             #sidebar { 
                 position: fixed; left: 0; top: 0; bottom: 0; z-index: 1000; 
@@ -233,7 +226,6 @@
 <body>
 
 <button id="btn-menu-mobile" onclick="event.preventDefault(); toggleMenuMobile();">☰ MENU</button>
-<button id="btn-fullscreen-mobile" onclick="forcarTelaCheia()" title="Ativar Tela Cheia">[  ]</button>
 
 <div id="overlay-mobile" onclick="toggleMenuMobile()"></div>
 
@@ -309,26 +301,6 @@
 </div>
 
 <script>
-    // --- FUNÇÃO DA FORÇA BRUTA (TELA CHEIA JS) ---
-    function forcarTelaCheia() {
-        let elemento = document.documentElement;
-        if (!document.fullscreenElement && !document.webkitFullscreenElement) {
-            // Entrar em tela cheia
-            if (elemento.requestFullscreen) {
-                elemento.requestFullscreen();
-            } else if (elemento.webkitRequestFullscreen) { /* Safari / iOS / Chrome antigo */
-                elemento.webkitRequestFullscreen();
-            }
-        } else {
-            // Sair da tela cheia
-            if (document.exitFullscreen) {
-                document.exitFullscreen();
-            } else if (document.webkitExitFullscreen) {
-                document.webkitExitFullscreen();
-            }
-        }
-    }
-
     function toggleMenuMobile() {
         document.getElementById('sidebar').classList.toggle('aberto');
         document.getElementById('overlay-mobile').classList.toggle('ativo');
