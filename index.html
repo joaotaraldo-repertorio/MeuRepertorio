@@ -177,24 +177,13 @@
         @keyframes slideIn { from { transform: translateY(100%); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
 
         /* =========================================================
-           CSS RESPONSIVO (GAVETA DESLIZANTE V2 - 100% SEGURO)
+           CSS RESPONSIVO (GAVETA DESLIZANTE V2)
            ========================================================= */
         #btn-menu-mobile { 
-            display: none; 
-            position: fixed; 
-            top: 10px; 
-            left: 10px; 
-            z-index: 900; 
-            background: var(--vermelho); 
-            color: white; 
-            border: none; 
-            border-radius: 5px; 
-            padding: 10px 15px; 
-            font-size: 18px; 
-            font-weight: bold;
-            cursor: pointer; 
-            box-shadow: 0 2px 5px rgba(0,0,0,0.3);
-            user-select: none;
+            display: none; position: fixed; top: 10px; left: 10px; z-index: 900; 
+            background: var(--vermelho); color: white; border: none; border-radius: 5px; 
+            padding: 10px 15px; font-size: 18px; font-weight: bold; cursor: pointer; 
+            box-shadow: 0 2px 5px rgba(0,0,0,0.3); user-select: none;
         }
 
         #overlay-mobile { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.6); z-index: 990; }
@@ -203,14 +192,9 @@
         @media (max-width: 850px) {
             #btn-menu-mobile { display: block; }
             #sidebar { 
-                position: fixed; 
-                left: 0; 
-                top: 0; 
-                bottom: 0; 
-                z-index: 1000; 
+                position: fixed; left: 0; top: 0; bottom: 0; z-index: 1000; 
                 box-shadow: 2px 0 15px rgba(0,0,0,0.5); 
-                transform: translateX(-105%); 
-                transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+                transform: translateX(-105%); transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             }
             #sidebar.aberto { transform: translateX(0); }
             #conteudo { padding-top: 60px; }
@@ -313,6 +297,7 @@
     }
 
     let musicaAtual = null;
+    let nodoMusicaAtiva = null; // <- O NOVO CÉREBRO DA NAVEGAÇÃO
     let semitonsOffset = 0;
     let tamFonteAtual = 1.25; 
     let espacamentoAtual = 1.2;
@@ -331,7 +316,6 @@
     let scrollInterval = null;
     let lastDragUpdate = 0; 
 
-    // Variáveis para detectar o deslize (Swipe)
     let touchStartX = 0;
     let touchEndX = 0;
     let touchStartY = 0;
@@ -359,7 +343,6 @@
         if (e.key === 'F5') { localStorage.removeItem('historico_joao_show'); }
     });
 
-    // --- MÁGICA 4: DETECÇÃO DE SWIPE (DESLIZE DE TELA) ---
     const areaConteudo = document.getElementById('conteudo');
 
     areaConteudo.addEventListener('touchstart', e => {
@@ -374,36 +357,34 @@
     }, {passive: true});
 
     function handleSwipe() {
-        if (!musicaAtual) return; // Só navega se já tiver uma música aberta na tela
+        if (!musicaAtual) return; 
         
         const deltaX = touchEndX - touchStartX;
         const deltaY = touchEndY - touchStartY;
         
-        // Verifica se o usuário puxou de lado e não pra cima/baixo (rolar a letra)
         if (Math.abs(deltaX) > Math.abs(deltaY) && Math.abs(deltaX) > 60) {
             if (deltaX < 0) {
-                // Puxou da direita pra esquerda -> Próxima música
                 navegarMusicaSiblina('proxima');
             } else {
-                // Puxou da esquerda pra direita -> Música anterior
                 navegarMusicaSiblina('anterior');
             }
         }
     }
 
+    // --- NOVA INTELIGÊNCIA DE SWIPE (PULA AS ESCONDIDAS E NÃO PINTA DE AZUL) ---
     function navegarMusicaSiblina(direcao) {
-        const elementoAtual = document.querySelector('.musica-ativa');
-        if (!elementoAtual) return;
+        if (!nodoMusicaAtiva) return; // Precisa saber qual é a música atual na lista
 
-        let irmao = (direcao === 'proxima') ? elementoAtual.nextElementSibling : elementoAtual.previousElementSibling;
+        let irmao = (direcao === 'proxima') ? nodoMusicaAtiva.nextElementSibling : nodoMusicaAtiva.previousElementSibling;
         
-        // Pula os separadores (pausas ou blocos vazios) até achar uma música de verdade
-        while (irmao && (!irmao.classList.contains('item-musica') || irmao.classList.contains('item-separador'))) {
+        // Fica pulando até achar uma música real (pula pausas, títulos e músicas escondidas pela busca)
+        while (irmao && (!irmao.classList.contains('item-musica') || irmao.classList.contains('item-separador') || irmao.style.display === 'none')) {
             irmao = (direcao === 'proxima') ? irmao.nextElementSibling : irmao.previousElementSibling;
         }
 
-        if (irmao) {
-            irmao.click(); // Clica automaticamente na próxima música da lista!
+        if (irmao && irmao.mObj) {
+            // O "true" no final avisa a função que foi por SWIPE (Modo espião!)
+            abrirMusica(irmao.mObj, irmao, true); 
         }
     }
 
@@ -580,7 +561,7 @@
         if (e.key === 'Enter') {
             const el = document.activeElement;
             if (el.classList.contains('pasta-titulo') || el.classList.contains('subpasta-titulo') || (el.classList.contains('item-musica') && !el.classList.contains('item-separador'))) {
-                e.preventDefault(); el.click();
+                e.preventDefault(); el.click(); // Isso dispara o onclick que é o "abrirMusica(..., false)" normal
             }
         }
     });
@@ -1050,7 +1031,10 @@
                     if (item.is_copy) { i.classList.add('item-medley-copy'); } 
                     else if (item.is_medley_head) { i.classList.add('item-medley-head'); }
                 }
-                i.onclick = () => { marcarComoTocada(m, safeID); }; 
+                
+                // MÁGICA: Agora o código anexa os dados e diz que foi um toque normal (false = não foi swipe)
+                i.mObj = m; 
+                i.onclick = function() { abrirMusica(m, this, false); }; 
             }
 
             if (ehElegivelArrastar) {
@@ -1133,26 +1117,48 @@
         setTimeout(() => { el.scrollIntoView({ behavior: 'smooth', block: 'start' }); atualizarNavegacao(); }, 100);
     }
 
-    function marcarComoTocada(mObj, id) {
-        musicaAtual = mObj; semitonsOffset = 0; tamFonteAtual = 1.25; espacamentoAtual = 1.2;
-        const uidSeguro = String(mObj.titulo || "").toLowerCase() + "|||" + String(mObj.artista || "").toLowerCase();
+    // --- NOVA FUNÇÃO PRINCIPAL DE ABRIR MÚSICA ---
+    function abrirMusica(mObj, elementoDOM, viaSwipe) {
+        musicaAtual = mObj; 
+        semitonsOffset = 0; 
+        tamFonteAtual = 1.25; 
+        espacamentoAtual = 1.2;
+        nodoMusicaAtiva = elementoDOM; // Grava na memória exatamente de qual pasta você clicou
+
+        const uidSeguro = elementoDOM.getAttribute('data-uid');
         
-        if (!musicasTocadasUnicas.has(uidSeguro)) {
-            musicasTocadasUnicas.add(uidSeguro); document.getElementById('txt-contador').innerText = musicasTocadasUnicas.size;
-            localStorage.setItem('historico_joao_show', JSON.stringify(Array.from(musicasTocadasUnicas)));
-        }
-        exibir();
-        document.querySelectorAll('.item-musica:not(.item-separador)').forEach(el => el.classList.remove('musica-ativa'));
-        document.querySelectorAll('.item-musica:not(.item-separador)').forEach(el => {
-            if(el.getAttribute('data-uid') === uidSeguro) {
-                el.classList.add('ja-tocada'); el.classList.add('musica-ativa'); el.classList.remove('item-sertanejo-base'); 
+        // Se NÃO foi via swipe (foi clique de verdade), salva no histórico e pinta de azul!
+        if (!viaSwipe) {
+            if (!musicasTocadasUnicas.has(uidSeguro)) {
+                musicasTocadasUnicas.add(uidSeguro); 
+                document.getElementById('txt-contador').innerText = musicasTocadasUnicas.size;
+                localStorage.setItem('historico_joao_show', JSON.stringify(Array.from(musicasTocadasUnicas)));
             }
-        });
-        fecharAviso(); atualizarNavegacao();
-        
-        if (window.innerWidth <= 850) {
-            fecharMenuMobile();
+            
+            // Pinta todas as cópias da música de azul escuro (ja-tocada)
+            document.querySelectorAll('.item-musica:not(.item-separador)').forEach(el => {
+                if(el.getAttribute('data-uid') === uidSeguro) {
+                    el.classList.add('ja-tocada'); 
+                    el.classList.remove('item-sertanejo-base'); 
+                }
+            });
         }
+
+        exibir(); // Mostra a letra na tela
+
+        // Destaca a música atual no menu com a cor forte
+        document.querySelectorAll('.item-musica:not(.item-separador)').forEach(el => el.classList.remove('musica-ativa'));
+        elementoDOM.classList.add('musica-ativa'); 
+        
+        // Se não for Swipe, executa o fechamento do menu e apaga o aviso de busca
+        if (!viaSwipe) {
+            fecharAviso(); 
+            if (window.innerWidth <= 850) {
+                fecharMenuMobile();
+            }
+        }
+        
+        atualizarNavegacao();
     }
 
     function transporAcorde(ac, s) {
