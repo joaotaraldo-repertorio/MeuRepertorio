@@ -4,9 +4,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Repertório Profissional - João</title>
-
-<meta name="apple-mobile-web-app-capable" content="yes">
+    
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="theme-color" content="#cc0000">
+    
+    <link rel="manifest" href="manifest.json">
     <script src="dados.js"></script>
     <style>
         /* --- CORES --- */
@@ -1184,13 +1188,11 @@
         }).join('');
     }
 
-    // --- MÁGICA 6: ESCONDENDO BOTÕES INÚTEIS NO MOBILE ---
     function exibir() {
         const v = document.getElementById('visor'); const divVisual = document.getElementById('area-cifra');
         if(!musicaAtual) { v.innerHTML = `<h1 style="color: var(--vermelho); margin-top: 30px;">Selecione uma música</h1>`; return; }
         const tE = transporAcorde(String(musicaAtual.tomOriginal || "C"), semitonsOffset);
         
-        // Adicionei a classe "esconder-mobile" nos botões de Linha e Editar!
         v.innerHTML = `
             <div class="cabecalho-musica">
                 <h1 class="titulo-txt">${musicaAtual.titulo || "Sem Título"}</h1>
