@@ -177,7 +177,7 @@
         @keyframes slideIn { from { transform: translateY(100%); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
 
         /* =========================================================
-           CSS RESPONSIVO (GAVETA DESLIZANTE V2)
+           CSS RESPONSIVO (MÁGICA DO CELULAR/TABLET)
            ========================================================= */
         #btn-menu-mobile { 
             display: none; position: fixed; top: 10px; left: 10px; z-index: 900; 
@@ -204,8 +204,14 @@
             .grupo-controle { height: 38px; padding: 2px 10px; border-radius: 19px; }
             .label-controle { font-size: 0.65em; }
             .tom-display { min-width: 35px; font-size: 1.3em; }
-            .btn-acao-rodape { padding: 12px 2px; font-size: 0.75em; }
             #relogio { display: none; }
+            
+            /* --- A MÁGICA DA LIMPEZA (Esconde os botões que não usa no App) --- */
+            .esconder-mobile { display: none !important; }
+            #btnExportar, #btnSinc, #btnModoEdicao { display: none !important; }
+            /* Deixa o botão de Importar grandão, ocupando a barra toda */
+            #rodape-sidebar { grid-template-columns: 1fr; }
+            .btn-acao-rodape { padding: 15px 2px; font-size: 0.85em; }
         }
     </style>
 </head>
@@ -252,10 +258,10 @@
     <div id="menuList"></div>
 
     <div id="rodape-sidebar">
-        <button class="btn-acao-rodape" onclick="exportarConfig()" title="Baixar Backup">💾 EXPORTAR</button>
-        <button class="btn-acao-rodape" onclick="importarConfig()" title="Carregar Backup">📂 IMPORTAR</button>
-        <button class="btn-acao-rodape btn-sincronizar" onclick="sincronizarComExcel()" title="Puxar ordem nova do Excel">🔄 SINC. EXCEL</button>
-        <button class="btn-acao-rodape btn-edicao" id="btnModoEdicao" onclick="alternarModoEdicao()" title="Travar/Destravar a lista para organizar">🔒 EDIÇÃO: OFF</button>
+        <button id="btnExportar" class="btn-acao-rodape" onclick="exportarConfig()" title="Baixar Backup">💾 EXPORTAR</button>
+        <button id="btnImportar" class="btn-acao-rodape" onclick="importarConfig()" title="Carregar Backup">📂 IMPORTAR</button>
+        <button id="btnSinc" class="btn-acao-rodape btn-sincronizar" onclick="sincronizarComExcel()" title="Puxar ordem nova do Excel">🔄 SINC. EXCEL</button>
+        <button id="btnModoEdicao" class="btn-acao-rodape btn-edicao" onclick="alternarModoEdicao()" title="Travar/Destravar a lista para organizar">🔒 EDIÇÃO: OFF</button>
     </div>
 </div>
 
@@ -1175,19 +1181,22 @@
         }).join('');
     }
 
+    // --- MÁGICA 6: ESCONDENDO BOTÕES INÚTEIS NO MOBILE ---
     function exibir() {
         const v = document.getElementById('visor'); const divVisual = document.getElementById('area-cifra');
         if(!musicaAtual) { v.innerHTML = `<h1 style="color: var(--vermelho); margin-top: 30px;">Selecione uma música</h1>`; return; }
         const tE = transporAcorde(String(musicaAtual.tomOriginal || "C"), semitonsOffset);
+        
+        // Adicionei a classe "esconder-mobile" nos botões de Linha e Editar!
         v.innerHTML = `
             <div class="cabecalho-musica">
                 <h1 class="titulo-txt">${musicaAtual.titulo || "Sem Título"}</h1>
                 <div class="controles-topo">
                     <div class="grupo-controle"><span class="label-controle">Tom</span><button class="btn-tom" onclick="mudarTom(-1)">-</button><div class="tom-display">${tE}</div><button class="btn-tom" onclick="mudarTom(1)">+</button></div>
                     <div class="grupo-controle"><span class="label-controle">Letra</span><button class="btn-tom btn-visual" onclick="ajustarFonte(-0.1)">-</button><button class="btn-tom btn-visual" onclick="ajustarFonte(0.1)">+</button></div>
-                    <div class="grupo-controle"><span class="label-controle">Linha</span><button class="btn-tom btn-visual" onclick="ajustarEspacamento(-0.1)">-</button><button class="btn-tom btn-visual" onclick="ajustarEspacamento(0.1)">+</button></div>
-                    <div class="grupo-controle"><span class="label-controle">EDITAR</span><button class="btn-tom btn-editor" onclick="abrirEditor()">✎</button></div>
-                    <div id="relogio">--:--</div>
+                    <div class="grupo-controle esconder-mobile"><span class="label-controle">Linha</span><button class="btn-tom btn-visual" onclick="ajustarEspacamento(-0.1)">-</button><button class="btn-tom btn-visual" onclick="ajustarEspacamento(0.1)">+</button></div>
+                    <div class="grupo-controle esconder-mobile"><span class="label-controle">EDITAR</span><button class="btn-tom btn-editor" onclick="abrirEditor()">✎</button></div>
+                    <div id="relogio" class="esconder-mobile">--:--</div>
                 </div>
             </div>
         `;
@@ -1251,7 +1260,6 @@
         });
     }
 
-    // --- MÁGICA 5: LIGAR A TELA SEMPRE (WAKE LOCK API) ---
     let wakeLock = null;
     async function ativarTelaSempreLigada() {
         if ('wakeLock' in navigator) {
@@ -1269,10 +1277,7 @@
         }
     }
 
-    // Tenta ativar quando a página carrega
     document.addEventListener('DOMContentLoaded', ativarTelaSempreLigada);
-
-    // Reativa se o usuário minimizar o app e voltar
     document.addEventListener('visibilitychange', async () => {
         if (wakeLock !== null && document.visibilityState === 'visible') {
             ativarTelaSempreLigada();

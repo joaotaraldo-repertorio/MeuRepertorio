@@ -2,7 +2,7 @@
   "name": "Repertório João",
   "short_name": "Repertório",
   "start_url": "./index.html",
-  "display": "standalone",
+  "display": "fullscreen",
   "background_color": "#121212",
   "theme_color": "#cc0000",
   "icons": [
