@@ -86,7 +86,6 @@
         .btn-mic-input.ouvindo { color: var(--vermelho); animation: pulse 1s infinite; }
         @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.2); } 100% { transform: scale(1); } }
         
-        /* MUDANÇA DA V74: Flexbox para permitir teletransporte das pastas */
         #menuList { flex-grow: 1; overflow-y: auto; padding: 10px; display: flex; flex-direction: column; }
         
         #rodape-sidebar { padding: 6px; display: grid; grid-template-columns: 1fr 1fr; gap: 4px; border-top: 1px solid var(--borda); background: var(--bg-sidebar); }
@@ -184,10 +183,21 @@
         #toast-aviso button { background: none; border: none; color: #fff; font-size: 1.2em; font-weight: bold; cursor: pointer; }
         @keyframes slideIn { from { transform: translateY(100%); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
 
+        /* =========================================================
+           CSS RESPONSIVO (MÁGICA DO CELULAR/TABLET)
+           ========================================================= */
         #btn-menu-mobile { 
             display: none; position: fixed; top: 10px; left: 10px; z-index: 900; 
             background: var(--vermelho); color: white; border: none; border-radius: 5px; 
             padding: 10px 15px; font-size: 18px; font-weight: bold; cursor: pointer; 
+            box-shadow: 0 2px 5px rgba(0,0,0,0.3); user-select: none;
+        }
+
+        /* O BOTÃO DA MARRETA VOLTOU! */
+        #btn-fullscreen-mobile {
+            display: none; position: fixed; top: 10px; right: 10px; z-index: 900;
+            background: #555; color: white; border: none; border-radius: 5px;
+            padding: 10px 15px; font-size: 18px; font-weight: bold; cursor: pointer;
             box-shadow: 0 2px 5px rgba(0,0,0,0.3); user-select: none;
         }
 
@@ -196,6 +206,8 @@
 
         @media (max-width: 850px) {
             #btn-menu-mobile { display: block; }
+            #btn-fullscreen-mobile { display: block; } /* Aparece só no celular */
+            
             #sidebar { 
                 position: fixed; left: 0; top: 0; bottom: 0; z-index: 1000; 
                 box-shadow: 2px 0 15px rgba(0,0,0,0.5); 
@@ -221,6 +233,7 @@
 <body>
 
 <button id="btn-menu-mobile" onclick="event.preventDefault(); toggleMenuMobile();">☰ MENU</button>
+<button id="btn-fullscreen-mobile" onclick="forcarTelaCheia()" title="Ativar Tela Cheia">[  ]</button>
 
 <div id="overlay-mobile" onclick="toggleMenuMobile()"></div>
 
@@ -296,6 +309,24 @@
 </div>
 
 <script>
+    // --- FUNÇÃO DA FORÇA BRUTA (TELA CHEIA JS) ---
+    function forcarTelaCheia() {
+        let elemento = document.documentElement;
+        if (!document.fullscreenElement && !document.webkitFullscreenElement) {
+            if (elemento.requestFullscreen) {
+                elemento.requestFullscreen();
+            } else if (elemento.webkitRequestFullscreen) { 
+                elemento.webkitRequestFullscreen();
+            }
+        } else {
+            if (document.exitFullscreen) {
+                document.exitFullscreen();
+            } else if (document.webkitExitFullscreen) {
+                document.webkitExitFullscreen();
+            }
+        }
+    }
+
     function toggleMenuMobile() {
         document.getElementById('sidebar').classList.toggle('aberto');
         document.getElementById('overlay-mobile').classList.toggle('ativo');
@@ -934,10 +965,9 @@
             });
         }
 
-        /* --- MÁGICA 1 DA V74: O filtro extermínio de PAUSAS --- */
+        /* --- O FILTRO QUE EXTERMINA AS PAUSAS ESTÁ AQUI --- */
         let listaFiltrada = musicas.filter(m => {
             let isPausa = (String(m.tomOriginal || "").toUpperCase() === "PAUSA");
-            // Se for a pasta Todas, ele joga a Pausa no lixo (retorna falso)!
             if(filtro.toUpperCase() === "MÚSICA - TODAS") return !isPausa; 
             return String(m.tags || "").toUpperCase().split(';').map(t=>t.trim()).includes(filtro.toUpperCase());
         });
@@ -1210,7 +1240,7 @@
 
     function mudarTom(v) { semitonsOffset += v; exibir(); }
 
-    /* --- MÁGICA 2 DA V74: Teletransporte da Pasta na Busca --- */
+    /* --- A BUSCA TELETRANSPORTADORA ESTÁ AQUI --- */
     function filtrarMusicas() { 
         let termo = removerAcentos(document.getElementById('inputBusca').value); 
         let btn = document.getElementById('btnLimparMusica');
@@ -1220,13 +1250,13 @@
         let menu = document.getElementById('menuList'); 
         
         if (termo.length > 0 && listaTodas) {
-            listaTodas.classList.add('ativo'); // Abre a pasta
+            listaTodas.classList.add('ativo'); 
             let pastaWrapper = listaTodas.parentElement;
-            pastaWrapper.style.order = "-1"; // Teletransporta pro Topo
-            setTimeout(() => { menu.scrollTop = 0; }, 10); // Rola a tela pra cima pra você ver
+            pastaWrapper.style.order = "-1"; 
+            setTimeout(() => { menu.scrollTop = 0; }, 10); 
         } else if (listaTodas) {
             let pastaWrapper = listaTodas.parentElement;
-            pastaWrapper.style.order = "0"; // Volta a pasta pro lugar normal se apagar a busca
+            pastaWrapper.style.order = "0"; 
         }
 
         let encontrou = false; 
@@ -1236,7 +1266,7 @@
             let item = items[i]; let texto = item.getAttribute('data-busca');
             if (texto.includes(termo)) { item.style.display = "block"; encontrou = true; } else { item.style.display = "none"; }
         }
-        menu.style.display = 'flex'; // Religa o menu
+        menu.style.display = 'flex'; 
         
         if (termo.length > 0 && !encontrou) { mostrarAviso("Música não encontrada."); } else { document.getElementById('toast-aviso').style.display = 'none'; }
         atualizarNavegacao();
@@ -1273,7 +1303,6 @@
     function limparBusca(tipo) { fecharAviso(); }
     window.onload = renderizarMenu;
 
-    // --- LIGAR O COFRE OFFLINE (SERVICE WORKER) ---
     if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => {
             navigator.serviceWorker.register('./sw.js')
