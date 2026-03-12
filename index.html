@@ -297,7 +297,7 @@
     }
 
     let musicaAtual = null;
-    let nodoMusicaAtiva = null; // <- O NOVO CÉREBRO DA NAVEGAÇÃO
+    let nodoMusicaAtiva = null; 
     let semitonsOffset = 0;
     let tamFonteAtual = 1.25; 
     let espacamentoAtual = 1.2;
@@ -371,19 +371,16 @@
         }
     }
 
-    // --- NOVA INTELIGÊNCIA DE SWIPE (PULA AS ESCONDIDAS E NÃO PINTA DE AZUL) ---
     function navegarMusicaSiblina(direcao) {
-        if (!nodoMusicaAtiva) return; // Precisa saber qual é a música atual na lista
+        if (!nodoMusicaAtiva) return; 
 
         let irmao = (direcao === 'proxima') ? nodoMusicaAtiva.nextElementSibling : nodoMusicaAtiva.previousElementSibling;
         
-        // Fica pulando até achar uma música real (pula pausas, títulos e músicas escondidas pela busca)
         while (irmao && (!irmao.classList.contains('item-musica') || irmao.classList.contains('item-separador') || irmao.style.display === 'none')) {
             irmao = (direcao === 'proxima') ? irmao.nextElementSibling : irmao.previousElementSibling;
         }
 
         if (irmao && irmao.mObj) {
-            // O "true" no final avisa a função que foi por SWIPE (Modo espião!)
             abrirMusica(irmao.mObj, irmao, true); 
         }
     }
@@ -561,7 +558,7 @@
         if (e.key === 'Enter') {
             const el = document.activeElement;
             if (el.classList.contains('pasta-titulo') || el.classList.contains('subpasta-titulo') || (el.classList.contains('item-musica') && !el.classList.contains('item-separador'))) {
-                e.preventDefault(); el.click(); // Isso dispara o onclick que é o "abrirMusica(..., false)" normal
+                e.preventDefault(); el.click();
             }
         }
     });
@@ -1032,7 +1029,6 @@
                     else if (item.is_medley_head) { i.classList.add('item-medley-head'); }
                 }
                 
-                // MÁGICA: Agora o código anexa os dados e diz que foi um toque normal (false = não foi swipe)
                 i.mObj = m; 
                 i.onclick = function() { abrirMusica(m, this, false); }; 
             }
@@ -1117,17 +1113,15 @@
         setTimeout(() => { el.scrollIntoView({ behavior: 'smooth', block: 'start' }); atualizarNavegacao(); }, 100);
     }
 
-    // --- NOVA FUNÇÃO PRINCIPAL DE ABRIR MÚSICA ---
     function abrirMusica(mObj, elementoDOM, viaSwipe) {
         musicaAtual = mObj; 
         semitonsOffset = 0; 
         tamFonteAtual = 1.25; 
         espacamentoAtual = 1.2;
-        nodoMusicaAtiva = elementoDOM; // Grava na memória exatamente de qual pasta você clicou
+        nodoMusicaAtiva = elementoDOM; 
 
         const uidSeguro = elementoDOM.getAttribute('data-uid');
         
-        // Se NÃO foi via swipe (foi clique de verdade), salva no histórico e pinta de azul!
         if (!viaSwipe) {
             if (!musicasTocadasUnicas.has(uidSeguro)) {
                 musicasTocadasUnicas.add(uidSeguro); 
@@ -1135,7 +1129,6 @@
                 localStorage.setItem('historico_joao_show', JSON.stringify(Array.from(musicasTocadasUnicas)));
             }
             
-            // Pinta todas as cópias da música de azul escuro (ja-tocada)
             document.querySelectorAll('.item-musica:not(.item-separador)').forEach(el => {
                 if(el.getAttribute('data-uid') === uidSeguro) {
                     el.classList.add('ja-tocada'); 
@@ -1144,13 +1137,11 @@
             });
         }
 
-        exibir(); // Mostra a letra na tela
+        exibir(); 
 
-        // Destaca a música atual no menu com a cor forte
         document.querySelectorAll('.item-musica:not(.item-separador)').forEach(el => el.classList.remove('musica-ativa'));
         elementoDOM.classList.add('musica-ativa'); 
         
-        // Se não for Swipe, executa o fechamento do menu e apaga o aviso de busca
         if (!viaSwipe) {
             fecharAviso(); 
             if (window.innerWidth <= 850) {
@@ -1259,6 +1250,35 @@
                 .catch(err => console.log('Erro no Cofre Offline: ', err));
         });
     }
+
+    // --- MÁGICA 5: LIGAR A TELA SEMPRE (WAKE LOCK API) ---
+    let wakeLock = null;
+    async function ativarTelaSempreLigada() {
+        if ('wakeLock' in navigator) {
+            try {
+                wakeLock = await navigator.wakeLock.request('screen');
+                console.log('Wake Lock ativado: A tela não vai apagar!');
+                wakeLock.addEventListener('release', () => {
+                    console.log('Wake Lock liberado.');
+                });
+            } catch (err) {
+                console.error('Erro no Wake Lock:', err);
+            }
+        } else {
+            console.log('Wake Lock API não suportada neste navegador.');
+        }
+    }
+
+    // Tenta ativar quando a página carrega
+    document.addEventListener('DOMContentLoaded', ativarTelaSempreLigada);
+
+    // Reativa se o usuário minimizar o app e voltar
+    document.addEventListener('visibilitychange', async () => {
+        if (wakeLock !== null && document.visibilityState === 'visible') {
+            ativarTelaSempreLigada();
+        }
+    });
+
 </script>
 </body>
 </html>
