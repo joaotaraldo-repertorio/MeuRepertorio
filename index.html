@@ -183,9 +183,6 @@
         #toast-aviso button { background: none; border: none; color: #fff; font-size: 1.2em; font-weight: bold; cursor: pointer; }
         @keyframes slideIn { from { transform: translateY(100%); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
 
-        /* =========================================================
-           CSS RESPONSIVO (MÁGICA DO CELULAR/TABLET)
-           ========================================================= */
         #btn-menu-mobile { 
             display: none; position: fixed; top: 10px; left: 10px; z-index: 900; 
             background: var(--vermelho); color: white; border: none; border-radius: 5px; 
@@ -193,7 +190,6 @@
             box-shadow: 0 2px 5px rgba(0,0,0,0.3); user-select: none;
         }
 
-        /* O BOTÃO DA MARRETA VOLTOU! */
         #btn-fullscreen-mobile {
             display: none; position: fixed; top: 10px; right: 10px; z-index: 900;
             background: #555; color: white; border: none; border-radius: 5px;
@@ -206,7 +202,7 @@
 
         @media (max-width: 850px) {
             #btn-menu-mobile { display: block; }
-            #btn-fullscreen-mobile { display: block; } /* Aparece só no celular */
+            #btn-fullscreen-mobile { display: block; } 
             
             #sidebar { 
                 position: fixed; left: 0; top: 0; bottom: 0; z-index: 1000; 
@@ -256,7 +252,7 @@
     <div id="busca-container">
         <div class="linha-busca" id="div-busca-musica">
             <div class="input-wrapper">
-                <input type="text" class="input-sidebar" id="inputBusca" placeholder="🎵 Buscar Música..." onkeyup="agendarBusca()">
+                <input type="text" class="input-sidebar" id="inputBusca" placeholder="🎵 Buscar Música/Letra..." onkeyup="agendarBusca()">
                 <button id="btnMicMusica" class="btn-mic-input" onclick="iniciarVoz('musica')" title="Falar">🎤</button>
                 <button id="btnLimparMusica" class="btn-limpar-input" onclick="limparBusca('musica')">×</button>
             </div>
@@ -309,7 +305,6 @@
 </div>
 
 <script>
-    // --- FUNÇÃO DA FORÇA BRUTA (TELA CHEIA JS) ---
     function forcarTelaCheia() {
         let elemento = document.documentElement;
         if (!document.fullscreenElement && !document.webkitFullscreenElement) {
@@ -965,7 +960,6 @@
             });
         }
 
-        /* --- O FILTRO QUE EXTERMINA AS PAUSAS ESTÁ AQUI --- */
         let listaFiltrada = musicas.filter(m => {
             let isPausa = (String(m.tomOriginal || "").toUpperCase() === "PAUSA");
             if(filtro.toUpperCase() === "MÚSICA - TODAS") return !isPausa; 
@@ -1061,7 +1055,11 @@
                     i.innerHTML = tituloSep;
                 }
             } else {
-                const textoBusca = removerAcentos(String(m.titulo || "") + " " + String(m.artista || "")); 
+                // --- MÁGICA DA V76: INCLUINDO A LETRA NA BUSCA ---
+                // Limpamos os símbolos especiais e quebras de linha para a busca não tropeçar neles
+                let letraLimpa = String(m.corpo || "").replace(/<[^>]*>?/gm, ' ').replace(/[\(\)\[\]"]/g, '').replace(/\n/g, ' ');
+                const textoBusca = removerAcentos(String(m.titulo || "") + " " + String(m.artista || "") + " " + letraLimpa); 
+                
                 i.setAttribute('data-busca', textoBusca);
                 i.innerHTML = `${m.titulo}<span class="artista-label">${m.artista}</span>`;
                 
@@ -1240,7 +1238,6 @@
 
     function mudarTom(v) { semitonsOffset += v; exibir(); }
 
-    /* --- A BUSCA TELETRANSPORTADORA ESTÁ AQUI --- */
     function filtrarMusicas() { 
         let termo = removerAcentos(document.getElementById('inputBusca').value); 
         let btn = document.getElementById('btnLimparMusica');
