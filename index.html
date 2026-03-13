@@ -88,14 +88,13 @@
         
         #menuList { flex-grow: 1; overflow-y: auto; padding: 10px; display: flex; flex-direction: column; }
         
-        /* MÁGICA V77: ESTILO DO PAINEL DO CIFRA CLUB */
+        /* MÁGICA V78: PAINEL DE BUSCA WEB EXPANDIDO */
         #msg-busca-vazia {
             display: none; 
             flex-direction: column; 
             align-items: center; 
-            padding: 40px 15px; 
+            padding: 20px 15px; 
             text-align: center; 
-            gap: 10px;
             flex-grow: 1;
         }
 
@@ -282,10 +281,15 @@
     <div id="menuList"></div>
 
     <div id="msg-busca-vazia">
-        <div style="font-size: 3.5em; margin-bottom: -10px;">🎸</div>
+        <div style="font-size: 3.0em; margin-bottom: -5px;">🎸</div>
         <h3 style="color: var(--vermelho); margin: 0;">Não encontrou?</h3>
-        <p style="font-size: 0.9em; margin: 0; color: var(--texto-padrao); opacity: 0.8;">Essa música ou artista não está no seu repertório offline.</p>
-        <button class="btn-acao-editor" style="background: #ff7700; color: #fff; margin-top: 15px; width: 100%; border-radius: 8px;" onclick="buscarNoCifraClub()">🔍 PROCURAR NO CIFRA CLUB</button>
+        <p style="font-size: 0.85em; margin: 0; color: var(--texto-padrao); opacity: 0.8;">Busque essa música na internet:</p>
+        
+        <div style="display: flex; flex-direction: column; gap: 8px; width: 100%; margin-top: 15px;">
+            <button class="btn-acao-editor" style="background: #ff7700; color: #fff; width: 100%; border-radius: 8px; height: 35px; font-size: 0.85em;" onclick="buscarNaWeb('cifraclub')">🔍 CIFRA CLUB</button>
+            <button class="btn-acao-editor" style="background: #0055aa; color: #fff; width: 100%; border-radius: 8px; height: 35px; font-size: 0.85em;" onclick="buscarNaWeb('cifras')">🔍 CIFRAS.COM.BR</button>
+            <button class="btn-acao-editor" style="background: #e6b800; color: #000; width: 100%; border-radius: 8px; height: 35px; font-size: 0.85em;" onclick="buscarNaWeb('banana')">🍌 BANANA CIFRAS</button>
+        </div>
     </div>
 
     <div id="rodape-sidebar">
@@ -363,7 +367,7 @@
     let itensNavegaveis = []; 
     let timerBusca = null;
     let ultimaAcaoEditor = null;
-    let ultimoTermoBuscado = ""; // Variável para a busca no Cifra Club
+    let ultimoTermoBuscado = ""; 
     
     let modoEdicao = false; 
     let itemArrastado = null; 
@@ -640,7 +644,11 @@
         document.getElementById('toast-msg').innerText = msg;
         toast.style.display = 'flex';
         clearTimeout(timeoutAviso);
-        timeoutAviso = setTimeout(fecharAviso, 10000); 
+        timeoutAviso = setTimeout(fecharAvisoToast, 5000); 
+    }
+
+    function fecharAvisoToast() {
+        document.getElementById('toast-aviso').style.display = 'none';
     }
 
     function fecharAviso() {
@@ -1259,10 +1267,9 @@
 
     function mudarTom(v) { semitonsOffset += v; exibir(); }
 
-    /* --- MÁGICA DA V77: BUSCA INTEGRADA COM O CIFRA CLUB --- */
     function filtrarMusicas() { 
         let inputEl = document.getElementById('inputBusca');
-        let termoOriginal = inputEl.value; // Guardamos exatamente o que você digitou
+        let termoOriginal = inputEl.value; 
         let termo = removerAcentos(termoOriginal); 
         let btn = document.getElementById('btnLimparMusica');
         btn.style.display = (termo.length > 0) ? "block" : "none";
@@ -1288,11 +1295,10 @@
             if (texto.includes(termo)) { item.style.display = "block"; encontrou = true; } else { item.style.display = "none"; }
         }
         
-        // Se digitou algo e NÃO encontrou nada...
         if (termo.length > 0 && !encontrou) { 
-            ultimoTermoBuscado = termoOriginal; // Salva pra buscar na internet
-            menu.style.display = 'none'; // Esconde a lista vazia
-            msgVazia.style.display = 'flex'; // Mostra o painel do Cifra Club
+            ultimoTermoBuscado = termoOriginal; 
+            menu.style.display = 'none'; 
+            msgVazia.style.display = 'flex'; 
         } else { 
             msgVazia.style.display = 'none'; 
             menu.style.display = 'flex'; 
@@ -1301,13 +1307,24 @@
         atualizarNavegacao();
     }
 
-    function buscarNoCifraClub() {
+    /* --- MÁGICA DA V78: PESQUISA MULTI-SITES COM GOOGLE --- */
+    function buscarNaWeb(site) {
         if (!navigator.onLine) {
             mostrarAviso("Você está sem internet no momento para buscar fora do aplicativo.");
             return;
         }
-        // Prepara o link e abre numa nova aba!
-        const url = `https://www.cifraclub.com.br/?q=${encodeURIComponent(ultimoTermoBuscado)}`;
+        
+        let url = '';
+        let query = encodeURIComponent(ultimoTermoBuscado);
+        
+        if (site === 'cifraclub') {
+            url = `https://www.cifraclub.com.br/?q=${query}`;
+        } else if (site === 'cifras') {
+            url = `https://www.google.com/search?q=${query}+site:cifras.com.br`;
+        } else if (site === 'banana') {
+            url = `https://www.google.com/search?q=${query}+site:bananacifras.com`;
+        }
+        
         window.open(url, '_blank');
     }
 
