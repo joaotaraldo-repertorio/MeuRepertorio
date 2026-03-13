@@ -88,6 +88,17 @@
         
         #menuList { flex-grow: 1; overflow-y: auto; padding: 10px; display: flex; flex-direction: column; }
         
+        /* MÁGICA V77: ESTILO DO PAINEL DO CIFRA CLUB */
+        #msg-busca-vazia {
+            display: none; 
+            flex-direction: column; 
+            align-items: center; 
+            padding: 40px 15px; 
+            text-align: center; 
+            gap: 10px;
+            flex-grow: 1;
+        }
+
         #rodape-sidebar { padding: 6px; display: grid; grid-template-columns: 1fr 1fr; gap: 4px; border-top: 1px solid var(--borda); background: var(--bg-sidebar); }
         .btn-acao-rodape { width: 100%; padding: 6px 2px; font-size: 0.65em; font-weight: bold; cursor: pointer; border: 1px solid var(--borda); border-radius: 4px; background: var(--bg-busca); color: var(--texto-padrao); transition: all 0.2s; font-family: 'Verdana', sans-serif; text-align: center; white-space: nowrap; display: flex; align-items: center; justify-content: center; }
         .btn-acao-rodape:hover { filter: brightness(0.95); transform: translateY(-1px); }
@@ -270,6 +281,13 @@
     
     <div id="menuList"></div>
 
+    <div id="msg-busca-vazia">
+        <div style="font-size: 3.5em; margin-bottom: -10px;">🎸</div>
+        <h3 style="color: var(--vermelho); margin: 0;">Não encontrou?</h3>
+        <p style="font-size: 0.9em; margin: 0; color: var(--texto-padrao); opacity: 0.8;">Essa música ou artista não está no seu repertório offline.</p>
+        <button class="btn-acao-editor" style="background: #ff7700; color: #fff; margin-top: 15px; width: 100%; border-radius: 8px;" onclick="buscarNoCifraClub()">🔍 PROCURAR NO CIFRA CLUB</button>
+    </div>
+
     <div id="rodape-sidebar">
         <button id="btnExportar" class="btn-acao-rodape" onclick="exportarConfig()" title="Baixar Backup">💾 EXPORTAR</button>
         <button id="btnImportar" class="btn-acao-rodape" onclick="importarConfig()" title="Carregar Backup">📂 IMPORTAR</button>
@@ -345,6 +363,7 @@
     let itensNavegaveis = []; 
     let timerBusca = null;
     let ultimaAcaoEditor = null;
+    let ultimoTermoBuscado = ""; // Variável para a busca no Cifra Club
     
     let modoEdicao = false; 
     let itemArrastado = null; 
@@ -626,8 +645,12 @@
 
     function fecharAviso() {
         document.getElementById('toast-aviso').style.display = 'none';
-        document.getElementById('inputBusca').value = ""; document.getElementById('inputBuscaPasta').value = "";
-        document.getElementById('btnLimparMusica').style.display = 'none'; document.getElementById('btnLimparPasta').style.display = 'none';
+        document.getElementById('inputBusca').value = ""; 
+        document.getElementById('inputBuscaPasta').value = "";
+        document.getElementById('btnLimparMusica').style.display = 'none'; 
+        document.getElementById('btnLimparPasta').style.display = 'none';
+        document.getElementById('msg-busca-vazia').style.display = 'none'; 
+        document.getElementById('menuList').style.display = 'flex'; 
         filtrarMusicas(); filtrarPastas();
     }
 
@@ -657,7 +680,7 @@
                 if (comandoAbrir) {
                     setTimeout(() => {
                         let primeiroItem = document.querySelector('.item-musica:not(.item-separador)[style*="block"]');
-                        if (primeiroItem) { primeiroItem.click(); } else { mostrarAviso("Música não encontrada."); }
+                        if (primeiroItem) { primeiroItem.click(); } 
                     }, 200);
                 }
             } else { filtrarPastas(); }
@@ -1055,8 +1078,6 @@
                     i.innerHTML = tituloSep;
                 }
             } else {
-                // --- MÁGICA DA V76: INCLUINDO A LETRA NA BUSCA ---
-                // Limpamos os símbolos especiais e quebras de linha para a busca não tropeçar neles
                 let letraLimpa = String(m.corpo || "").replace(/<[^>]*>?/gm, ' ').replace(/[\(\)\[\]"]/g, '').replace(/\n/g, ' ');
                 const textoBusca = removerAcentos(String(m.titulo || "") + " " + String(m.artista || "") + " " + letraLimpa); 
                 
@@ -1238,13 +1259,17 @@
 
     function mudarTom(v) { semitonsOffset += v; exibir(); }
 
+    /* --- MÁGICA DA V77: BUSCA INTEGRADA COM O CIFRA CLUB --- */
     function filtrarMusicas() { 
-        let termo = removerAcentos(document.getElementById('inputBusca').value); 
+        let inputEl = document.getElementById('inputBusca');
+        let termoOriginal = inputEl.value; // Guardamos exatamente o que você digitou
+        let termo = removerAcentos(termoOriginal); 
         let btn = document.getElementById('btnLimparMusica');
         btn.style.display = (termo.length > 0) ? "block" : "none";
         
         let listaTodas = document.getElementById('lista-todas-musicas'); 
         let menu = document.getElementById('menuList'); 
+        let msgVazia = document.getElementById('msg-busca-vazia');
         
         if (termo.length > 0 && listaTodas) {
             listaTodas.classList.add('ativo'); 
@@ -1257,23 +1282,47 @@
         }
 
         let encontrou = false; 
-        menu.style.display = 'none'; 
         const items = document.querySelectorAll('.item-musica:not(.item-separador)');
         for (let i = 0; i < items.length; i++) {
             let item = items[i]; let texto = item.getAttribute('data-busca');
             if (texto.includes(termo)) { item.style.display = "block"; encontrou = true; } else { item.style.display = "none"; }
         }
-        menu.style.display = 'flex'; 
         
-        if (termo.length > 0 && !encontrou) { mostrarAviso("Música não encontrada."); } else { document.getElementById('toast-aviso').style.display = 'none'; }
+        // Se digitou algo e NÃO encontrou nada...
+        if (termo.length > 0 && !encontrou) { 
+            ultimoTermoBuscado = termoOriginal; // Salva pra buscar na internet
+            menu.style.display = 'none'; // Esconde a lista vazia
+            msgVazia.style.display = 'flex'; // Mostra o painel do Cifra Club
+        } else { 
+            msgVazia.style.display = 'none'; 
+            menu.style.display = 'flex'; 
+        }
+        
         atualizarNavegacao();
     }
 
+    function buscarNoCifraClub() {
+        if (!navigator.onLine) {
+            mostrarAviso("Você está sem internet no momento para buscar fora do aplicativo.");
+            return;
+        }
+        // Prepara o link e abre numa nova aba!
+        const url = `https://www.cifraclub.com.br/?q=${encodeURIComponent(ultimoTermoBuscado)}`;
+        window.open(url, '_blank');
+    }
+
     function filtrarPastas() {
-        let termo = removerAcentos(document.getElementById('inputBuscaPasta').value); let btn = document.getElementById('btnLimparPasta');
+        let inputEl = document.getElementById('inputBuscaPasta');
+        let termoOriginal = inputEl.value;
+        let termo = removerAcentos(termoOriginal); 
+        let btn = document.getElementById('btnLimparPasta');
         btn.style.display = (termo.length > 0) ? "block" : "none";
-        const menu = document.getElementById('menuList'); menu.style.display = 'none'; 
-        let pastasPrincipais = menu.children; let encontrou = false;
+        
+        let menu = document.getElementById('menuList'); 
+        let msgVazia = document.getElementById('msg-busca-vazia');
+        let pastasPrincipais = menu.children; 
+        let encontrou = false;
+        
         for (let pasta of pastasPrincipais) {
             let spanTitulo = pasta.querySelector('.pasta-titulo'); if(!spanTitulo) continue;
             let nomePasta = spanTitulo.innerText; let mostrarPasta = false;
@@ -1292,12 +1341,22 @@
             } else { if (removerAcentos(nomePasta).includes(termo)) { mostrarPasta = true; } }
             if (mostrarPasta) encontrou = true; pasta.style.display = mostrarPasta ? "block" : "none";
         }
-        menu.style.display = 'flex'; 
-        if (termo.length > 0 && !encontrou) { mostrarAviso("Pasta não encontrada."); } else { document.getElementById('toast-aviso').style.display = 'none'; }
+        
+        if (termo.length > 0 && !encontrou) { 
+            ultimoTermoBuscado = termoOriginal;
+            menu.style.display = 'none'; 
+            msgVazia.style.display = 'flex'; 
+        } else { 
+            msgVazia.style.display = 'none'; 
+            menu.style.display = 'flex'; 
+        }
         atualizarNavegacao();
     }
 
-    function limparBusca(tipo) { fecharAviso(); }
+    function limparBusca(tipo) { 
+        fecharAviso(); 
+    }
+
     window.onload = renderizarMenu;
 
     if ('serviceWorker' in navigator) {
