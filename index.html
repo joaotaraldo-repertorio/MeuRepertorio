@@ -13,7 +13,7 @@
     <link rel="manifest" href="manifest.json">
     <script src="dados.js"></script>
     <style>
-        /* --- CORES --- */
+        /* --- CORES DA V79 (AZUL MAIS FORTE PARA O PARCEIRO LER DE LADO) --- */
         :root {
             --vermelho: #cc0000;
             --verde-show: #28a745;
@@ -24,13 +24,16 @@
             --bg-item: #eef4ff; 
             --bg-hover: #d0d0d0;
             --texto-padrao: #000;
-            --texto-azul: #0055aa;
+            
+            /* Azul bem escuro e forte para leitura lateral */
+            --texto-azul: #002277; 
+            
             --borda: #ccc;
             --sombra: rgba(0,0,0,0.2);
             --foco-teclado: #ff9800;
             
             --bg-ja-tocada: #8eb4e6; 
-            --texto-ja-tocada: #002255; 
+            --texto-ja-tocada: #001133; 
             --bg-alerta-sertanejo: #ffe5e5; 
             --texto-alerta-sertanejo: #cc0000; 
             
@@ -45,7 +48,10 @@
             --bg-item: #2a2a2a;
             --bg-hover: #444;
             --texto-padrao: #e0e0e0;
-            --texto-azul: #8ab4f8;
+            
+            /* Azul brilhante para leitura noturna no palco */
+            --texto-azul: #80bfff; 
+            
             --azul-ativo: #4a90e2;
             --borda: #444;
             --sombra: rgba(0,0,0,0.5);
@@ -62,12 +68,12 @@
         /* GERAL */
         body { font-family: 'Verdana', sans-serif; margin: 0; display: flex; height: 100vh; background: var(--bg-body); color: var(--texto-padrao); transition: background 0.3s, color 0.3s; overflow: hidden; }
         
-        #sidebar { width: 320px; background: var(--bg-sidebar); border-right: 2px solid var(--borda); display: flex; flex-direction: column; flex-shrink: 0; }
+        #sidebar { width: 340px; background: var(--bg-sidebar); border-right: 2px solid var(--borda); display: flex; flex-direction: column; flex-shrink: 0; }
         
         #painel-topo { display: flex; gap: 4px; padding: 8px; background: var(--bg-sidebar); border-bottom: 1px solid var(--borda); }
         .box-info { flex: 1; padding: 5px; border-radius: 6px; border: 2px solid var(--borda); background: var(--bg-busca); text-align: center; cursor: pointer; display: flex; flex-direction: column; justify-content: center; align-items: center; transition: all 0.2s; min-width: 0; }
         .box-info:hover { filter: brightness(0.95); }
-        .info-label { font-size: 0.65em; font-weight: bold; color: #888; text-transform: uppercase; margin-bottom: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; width: 100%; }
+        .info-label { font-size: 0.65em; font-weight: bold; color: #888; text-transform: uppercase; margin-bottom: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; width: 100%; user-select: none; }
         .info-valor { font-size: 1.0em; font-weight: bold; color: var(--texto-padrao); font-family: monospace; }
         .box-info.rodando { border-color: var(--verde-show); background-color: rgba(40, 167, 69, 0.1); }
         .box-info.rodando .info-valor { color: var(--verde-show); }
@@ -75,31 +81,29 @@
         #busca-container { padding: 10px; background: var(--bg-sidebar); border-bottom: 1px solid var(--borda); display: flex; flex-direction: column; gap: 8px; }
         .linha-busca { display: flex; align-items: center; width: 100%; }
         .input-wrapper { position: relative; flex-grow: 1; display: flex; align-items: center; }
-        .input-sidebar { width: 100%; padding: 8px; padding-right: 60px; box-sizing: border-box; border: 1px solid var(--borda); border-radius: 20px; font-size: 14px; outline: none; font-family: 'Verdana', sans-serif; background: var(--bg-busca); color: var(--texto-padrao); }
+        .input-sidebar { width: 100%; padding: 10px; padding-right: 60px; box-sizing: border-box; border: 1px solid var(--borda); border-radius: 20px; font-size: 15px; outline: none; font-family: 'Verdana', sans-serif; background: var(--bg-busca); color: var(--texto-padrao); }
         
+        /* CHAVEADOR DE BUSCA (Título vs Letra) */
+        .opcoes-busca { display: flex; justify-content: center; gap: 15px; margin-top: 2px; font-size: 0.75em; font-weight: bold; color: var(--texto-padrao); }
+        .opcoes-busca label { cursor: pointer; display: flex; align-items: center; gap: 4px; }
+        .opcoes-busca input { cursor: pointer; }
+
         #btnTema { background: none; border: none; font-size: 20px; cursor: pointer; padding: 5px; margin-left: 8px; border-radius: 50%; transition: transform 0.2s; flex-shrink: 0; }
         #btnTema:hover { transform: scale(1.1); background: var(--bg-hover); }
         
-        .btn-limpar-input { position: absolute; right: 10px; cursor: pointer; color: #999; font-weight: bold; font-size: 16px; display: none; background: none; border: none; }
-        .btn-mic-input { position: absolute; right: 32px; cursor: pointer; color: #555; font-size: 16px; background: none; border: none; transition: transform 0.2s, color 0.2s; }
+        .btn-limpar-input { position: absolute; right: 10px; cursor: pointer; color: #999; font-weight: bold; font-size: 18px; display: none; background: none; border: none; }
+        .btn-mic-input { position: absolute; right: 32px; cursor: pointer; color: #555; font-size: 18px; background: none; border: none; transition: transform 0.2s, color 0.2s; }
         .btn-mic-input:hover { transform: scale(1.2); color: var(--azul-ativo); }
         .btn-mic-input.ouvindo { color: var(--vermelho); animation: pulse 1s infinite; }
         @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.2); } 100% { transform: scale(1); } }
         
         #menuList { flex-grow: 1; overflow-y: auto; padding: 10px; display: flex; flex-direction: column; }
         
-        /* MÁGICA V78: PAINEL DE BUSCA WEB EXPANDIDO */
-        #msg-busca-vazia {
-            display: none; 
-            flex-direction: column; 
-            align-items: center; 
-            padding: 20px 15px; 
-            text-align: center; 
-            flex-grow: 1;
-        }
+        #msg-busca-vazia { display: none; flex-direction: column; align-items: center; padding: 20px 15px; text-align: center; flex-grow: 1; }
 
-        #rodape-sidebar { padding: 6px; display: grid; grid-template-columns: 1fr 1fr; gap: 4px; border-top: 1px solid var(--borda); background: var(--bg-sidebar); }
-        .btn-acao-rodape { width: 100%; padding: 6px 2px; font-size: 0.65em; font-weight: bold; cursor: pointer; border: 1px solid var(--borda); border-radius: 4px; background: var(--bg-busca); color: var(--texto-padrao); transition: all 0.2s; font-family: 'Verdana', sans-serif; text-align: center; white-space: nowrap; display: flex; align-items: center; justify-content: center; }
+        /* PORTA SECRETA: Oculto por padrão na V79 */
+        #rodape-sidebar { display: none; padding: 6px; grid-template-columns: 1fr 1fr; gap: 4px; border-top: 1px solid var(--borda); background: var(--bg-sidebar); }
+        .btn-acao-rodape { width: 100%; padding: 8px 2px; font-size: 0.65em; font-weight: bold; cursor: pointer; border: 1px solid var(--borda); border-radius: 4px; background: var(--bg-busca); color: var(--texto-padrao); transition: all 0.2s; font-family: 'Verdana', sans-serif; text-align: center; white-space: nowrap; display: flex; align-items: center; justify-content: center; }
         .btn-acao-rodape:hover { filter: brightness(0.95); transform: translateY(-1px); }
         
         .btn-sincronizar { background: #e0f7fa; color: #006064; border-color: #00bcd4; }
@@ -110,19 +114,21 @@
         body.dark-mode .btn-edicao { background: #333; color: #aaa; border-color: #555; }
         body.dark-mode .btn-edicao.edicao-ativa { background: #4e342e; color: #ffcc80; border-color: #ff9800; box-shadow: inset 0 0 5px rgba(255,152,0,0.5); }
 
-        .pasta-titulo { background: var(--bg-hover); padding: 9px; font-weight: bold; cursor: pointer; display: block; margin-top: 5px; border-radius: 8px; font-size: 0.85em; text-transform: uppercase; transition: background 0.1s; border-left: 4px solid transparent; color: var(--texto-padrao); outline: none; }
+        .pasta-titulo { background: var(--bg-hover); padding: 11px; font-weight: bold; cursor: pointer; display: block; margin-top: 5px; border-radius: 8px; font-size: 0.9em; text-transform: uppercase; transition: background 0.1s; border-left: 4px solid transparent; color: var(--texto-padrao); outline: none; }
         .pasta-titulo:hover { background-color: var(--borda); transform: translateX(2px); border-left: 4px solid var(--vermelho); }
         .pasta-titulo:focus { border-left: 4px solid var(--foco-teclado); background-color: var(--borda); }
 
-        .subpasta-titulo { background: var(--bg-busca); padding: 7px 15px; font-weight: normal; cursor: pointer; display: block; margin-top: 2px; border-bottom: 1px solid var(--borda); font-size: 0.8em; border-radius: 4px; transition: background 0.1s; color: var(--texto-padrao); outline: none; }
+        .subpasta-titulo { background: var(--bg-busca); padding: 9px 15px; font-weight: bold; cursor: pointer; display: block; margin-top: 2px; border-bottom: 1px solid var(--borda); font-size: 0.85em; border-radius: 4px; transition: background 0.1s; color: var(--texto-padrao); outline: none; }
         .subpasta-titulo:hover { background-color: var(--bg-hover); }
 
         .musicas-da-pasta { display: none; margin-left: 10px; border-left: 2px solid var(--texto-azul); }
         .musicas-da-pasta.ativo { display: block; }
         
-        .item-musica { padding: 9px 12px; cursor: pointer; border-bottom: 1px solid var(--borda); font-size: 13px; line-height: 1.3; color: var(--texto-azul); background-color: var(--bg-item); font-weight: 500; margin-bottom: 2px; border-radius: 4px; transition: background 0.1s, transform 0.1s; outline: none; }
+        /* FONTES MAIORES E EM NEGRITO NA V79 */
+        .item-musica { padding: 12px 14px; cursor: pointer; border-bottom: 1px solid var(--borda); font-size: 15px; line-height: 1.3; color: var(--texto-azul); background-color: var(--bg-item); font-weight: 600; margin-bottom: 2px; border-radius: 4px; transition: background 0.1s, transform 0.1s; outline: none; }
         .item-musica:hover { filter: brightness(0.95); transform: translateX(2px); }
-        .artista-label { font-size: 0.75em; color: #888; display: block; font-weight: normal; margin-top: 2px; }
+        .artista-label { font-size: 0.8em; color: #444; display: block; font-weight: 500; margin-top: 3px; }
+        body.dark-mode .artista-label { color: #aaa; }
         
         .item-musica[draggable="true"] { cursor: grab; }
         .item-musica.arrastando { opacity: 0.5; border: 2px dashed var(--vermelho); background-color: #ffe5e5; cursor: grabbing; }
@@ -144,8 +150,7 @@
         .item-medley-copy .artista-label { color: inherit; opacity: 0.7; }
 
         .ja-tocada { background-color: var(--bg-ja-tocada) !important; color: var(--texto-ja-tocada) !important; border-left: 4px solid var(--azul-ativo) !important; }
-        .ja-tocada .artista-label { color: #001133 !important; }
-        body.dark-mode .ja-tocada .artista-label { color: #bbddff !important; }
+        .ja-tocada .artista-label { color: var(--texto-ja-tocada) !important; opacity: 0.8; }
 
         .musica-ativa { background-color: var(--azul-ativo) !important; color: #fff !important; transform: translateX(5px); border-left: 4px solid var(--foco-teclado) !important; }
         .musica-ativa .artista-label { color: #ddd !important; }
@@ -193,32 +198,15 @@
         #toast-aviso button { background: none; border: none; color: #fff; font-size: 1.2em; font-weight: bold; cursor: pointer; }
         @keyframes slideIn { from { transform: translateY(100%); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
 
-        #btn-menu-mobile { 
-            display: none; position: fixed; top: 10px; left: 10px; z-index: 900; 
-            background: var(--vermelho); color: white; border: none; border-radius: 5px; 
-            padding: 10px 15px; font-size: 18px; font-weight: bold; cursor: pointer; 
-            box-shadow: 0 2px 5px rgba(0,0,0,0.3); user-select: none;
-        }
-
-        #btn-fullscreen-mobile {
-            display: none; position: fixed; top: 10px; right: 10px; z-index: 900;
-            background: #555; color: white; border: none; border-radius: 5px;
-            padding: 10px 15px; font-size: 18px; font-weight: bold; cursor: pointer;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.3); user-select: none;
-        }
-
+        #btn-menu-mobile { display: none; position: fixed; top: 10px; left: 10px; z-index: 900; background: var(--vermelho); color: white; border: none; border-radius: 5px; padding: 10px 15px; font-size: 18px; font-weight: bold; cursor: pointer; box-shadow: 0 2px 5px rgba(0,0,0,0.3); user-select: none; }
+        #btn-fullscreen-mobile { display: none; position: fixed; top: 10px; right: 10px; z-index: 900; background: #555; color: white; border: none; border-radius: 5px; padding: 10px 15px; font-size: 18px; font-weight: bold; cursor: pointer; box-shadow: 0 2px 5px rgba(0,0,0,0.3); user-select: none; }
         #overlay-mobile { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.6); z-index: 990; }
         #overlay-mobile.ativo { display: block; }
 
         @media (max-width: 850px) {
             #btn-menu-mobile { display: block; }
             #btn-fullscreen-mobile { display: block; } 
-            
-            #sidebar { 
-                position: fixed; left: 0; top: 0; bottom: 0; z-index: 1000; 
-                box-shadow: 2px 0 15px rgba(0,0,0,0.5); 
-                transform: translateX(-105%); transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            }
+            #sidebar { position: fixed; left: 0; top: 0; bottom: 0; z-index: 1000; box-shadow: 2px 0 15px rgba(0,0,0,0.5); transform: translateX(-105%); transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
             #sidebar.aberto { transform: translateX(0); }
             #conteudo { padding-top: 60px; }
             .cabecalho-musica { flex-direction: column; align-items: center; text-align: center; }
@@ -230,9 +218,6 @@
             #relogio { display: none; }
             
             .esconder-mobile { display: none !important; }
-            #btnExportar, #btnSinc, #btnModoEdicao { display: none !important; }
-            #rodape-sidebar { grid-template-columns: 1fr; }
-            .btn-acao-rodape { padding: 15px 2px; font-size: 0.85em; }
         }
     </style>
 </head>
@@ -246,7 +231,7 @@
 <div id="sidebar">
     <div id="painel-topo">
         <div id="box-cronometro" class="box-info" onclick="alternarCronometro()">
-            <div class="info-label">Tempo</div>
+            <div class="info-label" onclick="checarSenhaMuvuca(event)">Tempo</div>
             <div class="info-valor" id="txt-cronometro">00:00:00</div>
         </div>
         <div id="box-contador" class="box-info" onclick="limparHistorico()">
@@ -261,12 +246,18 @@
 
     <div id="busca-container">
         <div class="linha-busca" id="div-busca-musica">
-            <div class="input-wrapper">
-                <input type="text" class="input-sidebar" id="inputBusca" placeholder="🎵 Buscar Música/Letra..." onkeyup="agendarBusca()">
-                <button id="btnMicMusica" class="btn-mic-input" onclick="iniciarVoz('musica')" title="Falar">🎤</button>
-                <button id="btnLimparMusica" class="btn-limpar-input" onclick="limparBusca('musica')">×</button>
+            <div class="input-wrapper" style="flex-direction: column; align-items: stretch;">
+                <div style="position: relative; display: flex; align-items: center; width: 100%;">
+                    <input type="text" class="input-sidebar" id="inputBusca" placeholder="🎵 Buscar Música..." onkeyup="agendarBusca()">
+                    <button id="btnMicMusica" class="btn-mic-input" onclick="iniciarVoz('musica')" title="Falar">🎤</button>
+                    <button id="btnLimparMusica" class="btn-limpar-input" onclick="limparBusca('musica')">×</button>
+                </div>
+                <div class="opcoes-busca">
+                    <label><input type="radio" name="tipoBuscaMusica" value="titulo" checked onchange="filtrarMusicas()"> Nome/Cantor</label>
+                    <label><input type="radio" name="tipoBuscaMusica" value="letra" onchange="filtrarMusicas()"> Letra</label>
+                </div>
             </div>
-            <button id="btnTema" onclick="alternarTema()" title="Alternar Modo Noturno">🌗</button>
+            <button id="btnTema" onclick="alternarTema()" title="Alternar Modo Noturno" style="margin-bottom: 25px;">🌗</button>
         </div>
         
         <div class="linha-busca" id="div-busca-pasta">
@@ -327,6 +318,29 @@
 </div>
 
 <script>
+    // --- LÓGICA DA PORTA SECRETA (SENHA MUVUCA) ---
+    let cliquesSenha = 0;
+    let timerSenha = null;
+
+    function checarSenhaMuvuca(event) {
+        event.stopPropagation(); 
+        cliquesSenha++;
+        clearTimeout(timerSenha);
+        
+        if (cliquesSenha >= 3) {
+            cliquesSenha = 0;
+            let senha = prompt("ACESSO RESTRITO\nDigite a senha para habilitar os botões de edição:");
+            if (senha === "muvuca") {
+                document.getElementById('rodape-sidebar').style.display = 'grid';
+                mostrarAviso("Área de Edição Liberada!");
+            } else if (senha !== null && senha !== "") {
+                alert("Senha Incorreta!");
+            }
+        } else {
+            timerSenha = setTimeout(() => { cliquesSenha = 0; }, 1000); 
+        }
+    }
+
     function forcarTelaCheia() {
         let elemento = document.documentElement;
         if (!document.fullscreenElement && !document.webkitFullscreenElement) {
@@ -417,31 +431,21 @@
 
     function handleSwipe() {
         if (!musicaAtual) return; 
-        
         const deltaX = touchEndX - touchStartX;
         const deltaY = touchEndY - touchStartY;
-        
         if (Math.abs(deltaX) > Math.abs(deltaY) && Math.abs(deltaX) > 60) {
-            if (deltaX < 0) {
-                navegarMusicaSiblina('proxima');
-            } else {
-                navegarMusicaSiblina('anterior');
-            }
+            if (deltaX < 0) navegarMusicaSiblina('proxima');
+            else navegarMusicaSiblina('anterior');
         }
     }
 
     function navegarMusicaSiblina(direcao) {
         if (!nodoMusicaAtiva) return; 
-
         let irmao = (direcao === 'proxima') ? nodoMusicaAtiva.nextElementSibling : nodoMusicaAtiva.previousElementSibling;
-        
         while (irmao && (!irmao.classList.contains('item-musica') || irmao.classList.contains('item-separador') || irmao.style.display === 'none')) {
             irmao = (direcao === 'proxima') ? irmao.nextElementSibling : irmao.previousElementSibling;
         }
-
-        if (irmao && irmao.mObj) {
-            abrirMusica(irmao.mObj, irmao, true); 
-        }
+        if (irmao && irmao.mObj) { abrirMusica(irmao.mObj, irmao, true); }
     }
 
     function alternarModoEdicao() {
@@ -476,9 +480,7 @@
             let keysToRemove = [];
             for (let i = 0; i < localStorage.length; i++) {
                 let key = localStorage.key(i);
-                if (key && key.startsWith('ordem_pasta_')) {
-                    keysToRemove.push(key);
-                }
+                if (key && key.startsWith('ordem_pasta_')) { keysToRemove.push(key); }
             }
             keysToRemove.forEach(k => localStorage.removeItem(k));
             location.reload();
@@ -517,9 +519,7 @@
             reader.onload = ev => {
                 try {
                     let backup = JSON.parse(ev.target.result);
-                    for (let key in backup) {
-                        localStorage.setItem(key, backup[key]);
-                    }
+                    for (let key in backup) { localStorage.setItem(key, backup[key]); }
                     alert("Backup importado com sucesso! O programa será recarregado.");
                     location.reload(); 
                 } catch (err) { alert("Erro ao importar. O arquivo selecionado não é um backup válido."); }
@@ -551,8 +551,7 @@
             }
         }
         if (e.key === 'ArrowDown') { 
-            e.preventDefault(); 
-            atualizarNavegacao(); 
+            e.preventDefault(); atualizarNavegacao(); 
             if(itensNavegaveis.length > 0) {
                 itensNavegaveis[0].focus({ preventScroll: true });
                 itensNavegaveis[0].scrollIntoView({ block: 'nearest' });
@@ -647,9 +646,7 @@
         timeoutAviso = setTimeout(fecharAvisoToast, 5000); 
     }
 
-    function fecharAvisoToast() {
-        document.getElementById('toast-aviso').style.display = 'none';
-    }
+    function fecharAvisoToast() { document.getElementById('toast-aviso').style.display = 'none'; }
 
     function fecharAviso() {
         document.getElementById('toast-aviso').style.display = 'none';
@@ -783,28 +780,20 @@
         let rect = menuListEl.getBoundingClientRect();
         let margem = 100; 
         
-        if (e.clientY < rect.top + margem) {
-            scrollSpeedY = -25;
-        } else if (e.clientY > rect.bottom - margem) {
-            scrollSpeedY = 25;
-        } else {
-            scrollSpeedY = 0;
-        }
+        if (e.clientY < rect.top + margem) scrollSpeedY = -25;
+        else if (e.clientY > rect.bottom - margem) scrollSpeedY = 25;
+        else scrollSpeedY = 0;
 
         if (scrollSpeedY !== 0 && !scrollInterval) {
-            scrollInterval = setInterval(() => {
-                menuListEl.scrollTop += scrollSpeedY;
-            }, 30);
+            scrollInterval = setInterval(() => { menuListEl.scrollTop += scrollSpeedY; }, 30);
         } else if (scrollSpeedY === 0 && scrollInterval) {
-            clearInterval(scrollInterval);
-            scrollInterval = null;
+            clearInterval(scrollInterval); scrollInterval = null;
         }
     });
 
     document.addEventListener('dragend', () => {
         if(scrollInterval) clearInterval(scrollInterval);
-        scrollInterval = null;
-        scrollSpeedY = 0;
+        scrollInterval = null; scrollSpeedY = 0;
     });
 
     function getDragAfterElement(container, y) {
@@ -812,9 +801,8 @@
         return draggableElements.reduce((closest, child) => {
             const box = child.getBoundingClientRect();
             const offset = y - box.top - box.height / 2;
-            if (offset < 0 && offset > closest.offset) {
-                return { offset: offset, element: child };
-            } else { return closest; }
+            if (offset < 0 && offset > closest.offset) { return { offset: offset, element: child }; } 
+            else { return closest; }
         }, { offset: Number.NEGATIVE_INFINITY }).element;
     }
 
@@ -828,9 +816,7 @@
         let freq = {};
         objItensBase.forEach(item => { 
             let tomItem = String(item.mObj.tomOriginal || "").toUpperCase();
-            if (tomItem !== "PAUSA") {
-                freq[item.uid] = (freq[item.uid] || 0) + 1; 
-            }
+            if (tomItem !== "PAUSA") { freq[item.uid] = (freq[item.uid] || 0) + 1; }
         });
 
         for(let i=0; i<objItensBase.length; i++) {
@@ -838,14 +824,10 @@
             if(tomItem !== "PAUSA" && freq[objItensBase[i].uid] > 1) {
                 let prev = "", next = "\uffff"; 
                 for(let j=i-1; j>=0; j--) { 
-                    if(String(objItensBase[j].mObj.tomOriginal || "").toUpperCase() !== "PAUSA" && freq[objItensBase[j].uid] === 1) { 
-                        prev = removerAcentos(objItensBase[j].mObj.titulo); break; 
-                    } 
+                    if(String(objItensBase[j].mObj.tomOriginal || "").toUpperCase() !== "PAUSA" && freq[objItensBase[j].uid] === 1) { prev = removerAcentos(objItensBase[j].mObj.titulo); break; } 
                 }
                 for(let j=i+1; j<objItensBase.length; j++) { 
-                    if(String(objItensBase[j].mObj.tomOriginal || "").toUpperCase() !== "PAUSA" && freq[objItensBase[j].uid] === 1) { 
-                        next = removerAcentos(objItensBase[j].mObj.titulo); break; 
-                    } 
+                    if(String(objItensBase[j].mObj.tomOriginal || "").toUpperCase() !== "PAUSA" && freq[objItensBase[j].uid] === 1) { next = removerAcentos(objItensBase[j].mObj.titulo); break; } 
                 }
                 
                 let tituloAtual = removerAcentos(objItensBase[i].mObj.titulo);
@@ -859,7 +841,6 @@
                     let penalty = 0;
                     if (prev && prev.length > 0) penalty += Math.abs(tituloAtual.charCodeAt(0) - prev.charCodeAt(0));
                     if (next && next !== "\uffff" && next.length > 0) penalty += Math.abs(next.charCodeAt(0) - tituloAtual.charCodeAt(0));
-                    
                     score -= (penalty * 0.001);
                 }
                 objItensBase[i].score = score;
@@ -870,23 +851,15 @@
         objItensBase.forEach((item, index) => {
             let tomItem = String(item.mObj.tomOriginal || "").toUpperCase();
             if(tomItem !== "PAUSA" && freq[item.uid] > 1) {
-                if(origIndices[item.uid] === undefined) {
-                    origIndices[item.uid] = index;
-                } else {
-                    if(item.score > objItensBase[origIndices[item.uid]].score) {
-                        origIndices[item.uid] = index;
-                    }
-                }
+                if(origIndices[item.uid] === undefined) { origIndices[item.uid] = index; } 
+                else { if(item.score > objItensBase[origIndices[item.uid]].score) { origIndices[item.uid] = index; } }
             }
         });
 
         objItensBase.forEach((item, index) => {
             let tomItem = String(item.mObj.tomOriginal || "").toUpperCase();
-            if (tomItem === "PAUSA") {
-                item.is_copy = false;
-            } else {
-                item.is_copy = (freq[item.uid] > 1 && origIndices[item.uid] !== index);
-            }
+            if (tomItem === "PAUSA") { item.is_copy = false; } 
+            else { item.is_copy = (freq[item.uid] > 1 && origIndices[item.uid] !== index); }
         });
 
         objItensBase.forEach((item, index) => {
@@ -899,25 +872,17 @@
 
     function recalcularMedleyBase(container) {
         let items = Array.from(container.querySelectorAll('.item-musica'));
-        let data = items.map(el => {
-            return { el: el, uid: el.getAttribute('data-uid'), titulo: el.getAttribute('data-titulo'), tom: el.getAttribute('data-tom') };
-        });
+        let data = items.map(el => { return { el: el, uid: el.getAttribute('data-uid'), titulo: el.getAttribute('data-titulo'), tom: el.getAttribute('data-tom') }; });
 
         let freq = {};
-        data.forEach(item => { 
-            if (item.tom !== "PAUSA") freq[item.uid] = (freq[item.uid] || 0) + 1; 
-        });
+        data.forEach(item => { if (item.tom !== "PAUSA") freq[item.uid] = (freq[item.uid] || 0) + 1; });
 
         data.forEach((item, i) => {
             item.el.classList.remove('item-medley-copy', 'item-medley-head'); 
             if (item.tom !== "PAUSA" && freq[item.uid] > 1) {
                 let prev = "", next = "\uffff"; 
-                for(let j=i-1; j>=0; j--) { 
-                    if(data[j].tom !== "PAUSA" && freq[data[j].uid] === 1) { prev = removerAcentos(data[j].titulo); break; } 
-                }
-                for(let j=i+1; j<data.length; j++) { 
-                    if(data[j].tom !== "PAUSA" && freq[data[j].uid] === 1) { next = removerAcentos(data[j].titulo); break; } 
-                }
+                for(let j=i-1; j>=0; j--) { if(data[j].tom !== "PAUSA" && freq[data[j].uid] === 1) { prev = removerAcentos(data[j].titulo); break; } }
+                for(let j=i+1; j<data.length; j++) { if(data[j].tom !== "PAUSA" && freq[data[j].uid] === 1) { next = removerAcentos(data[j].titulo); break; } }
                 
                 let tituloAtual = removerAcentos(item.titulo);
                 let score = (tituloAtual >= prev ? 1 : 0) + (tituloAtual <= next ? 1 : 0);
@@ -930,7 +895,6 @@
                     let penalty = 0;
                     if (prev && prev.length > 0) penalty += Math.abs(tituloAtual.charCodeAt(0) - prev.charCodeAt(0));
                     if (next && next !== "\uffff" && next.length > 0) penalty += Math.abs(next.charCodeAt(0) - tituloAtual.charCodeAt(0));
-                    
                     score -= (penalty * 0.001);
                 }
                 item.score = score;
@@ -940,31 +904,21 @@
         let origIndices = {};
         data.forEach((item, index) => {
             if(item.tom !== "PAUSA" && freq[item.uid] > 1) {
-                if(origIndices[item.uid] === undefined) {
-                    origIndices[item.uid] = index;
-                } else {
-                    if(item.score > data[origIndices[item.uid]].score) {
-                        origIndices[item.uid] = index;
-                    }
-                }
+                if(origIndices[item.uid] === undefined) { origIndices[item.uid] = index; } 
+                else { if(item.score > data[origIndices[item.uid]].score) { origIndices[item.uid] = index; } }
             }
         });
 
         data.forEach((item, index) => {
-            if (item.tom === "PAUSA") {
-                item.is_copy = false;
-            } else {
-                item.is_copy = (freq[item.uid] > 1 && origIndices[item.uid] !== index);
-            }
+            if (item.tom === "PAUSA") { item.is_copy = false; } 
+            else { item.is_copy = (freq[item.uid] > 1 && origIndices[item.uid] !== index); }
         });
 
         data.forEach((item, index) => {
             if (item.tom !== "PAUSA" && item.is_copy && index > 0 && !data[index-1].is_copy && data[index-1].tom !== "PAUSA") {
                 data[index-1].el.classList.add('item-medley-head');
             }
-            if (item.is_copy) {
-                item.el.classList.add('item-medley-copy');
-            }
+            if (item.is_copy) { item.el.classList.add('item-medley-copy'); }
         });
     }
 
@@ -980,11 +934,9 @@
             dM.addEventListener('dragover', e => {
                 e.preventDefault();
                 if (!itemArrastado) return;
-                
                 let agora = Date.now();
                 if (agora - lastDragUpdate < 40) return;
                 lastDragUpdate = agora;
-
                 const afterElement = getDragAfterElement(dM, e.clientY);
                 if (afterElement == null) { dM.appendChild(itemArrastado); } 
                 else { dM.insertBefore(itemArrastado, afterElement); }
@@ -1004,10 +956,7 @@
             listaFiltrada.forEach(m => {
                 let isPausa = (String(m.tomOriginal || "").toUpperCase() === "PAUSA");
                 let uidSeguro = String(m.titulo || "").toLowerCase() + "|||" + String(m.artista || "").toLowerCase();
-                if (isPausa) {
-                    pausaCount++;
-                    uidSeguro += "_PAUSA_" + pausaCount; 
-                }
+                if (isPausa) { pausaCount++; uidSeguro += "_PAUSA_" + pausaCount; }
                 objItensBase.push({ mObj: m, uid: uidSeguro });
             });
         } else {
@@ -1025,10 +974,7 @@
             listaFiltrada.forEach(m => {
                 let isPausa = (String(m.tomOriginal || "").toUpperCase() === "PAUSA");
                 let uidSeguro = String(m.titulo || "").toLowerCase() + "|||" + String(m.artista || "").toLowerCase();
-                if (isPausa) {
-                    pausaCount++;
-                    uidSeguro += "_PAUSA_" + pausaCount; 
-                }
+                if (isPausa) { pausaCount++; uidSeguro += "_PAUSA_" + pausaCount; }
                 objItensBase.push({ mObj: m, uid: uidSeguro });
             });
         }
@@ -1041,26 +987,18 @@
                     if(Array.isArray(orderArray)) {
                         let pool = [...objItensBase];
                         let sortedBase = [];
-                        
                         for (let savedUid of orderArray) {
                             let index = pool.findIndex(item => item.uid === savedUid);
-                            if (index !== -1) {
-                                sortedBase.push(pool.splice(index, 1)[0]);
-                            }
+                            if (index !== -1) { sortedBase.push(pool.splice(index, 1)[0]); }
                         }
-                        
-                        for (let newItem of pool) {
-                            sortedBase.push(newItem);
-                        }
+                        for (let newItem of pool) { sortedBase.push(newItem); }
                         objItensBase = sortedBase;
                     }
                 } catch(e) {}
             }
         }
 
-        if (nome.toUpperCase() === "BASE") {
-            aplicarInteligenciaMedley(objItensBase);
-        }
+        if (nome.toUpperCase() === "BASE") { aplicarInteligenciaMedley(objItensBase); }
         
         objItensBase.forEach(item => {
             let m = item.mObj;
@@ -1080,16 +1018,16 @@
             if (isSeparador) {
                 i.classList.add('item-separador');
                 let tituloSep = String(m.titulo || "").trim();
-                if (tituloSep === "" || tituloSep === "x x x" || tituloSep === "---" || tituloSep === "Sem Título") {
-                    i.innerHTML = "";
-                } else {
-                    i.innerHTML = tituloSep;
-                }
+                if (tituloSep === "" || tituloSep === "x x x" || tituloSep === "---" || tituloSep === "Sem Título") { i.innerHTML = ""; } 
+                else { i.innerHTML = tituloSep; }
             } else {
+                /* MÁGICA 3 V79: Gravando Título e Letra separados para a busca otimizada */
+                let tituloLimpo = removerAcentos(String(m.titulo || "") + " " + String(m.artista || ""));
                 let letraLimpa = String(m.corpo || "").replace(/<[^>]*>?/gm, ' ').replace(/[\(\)\[\]"]/g, '').replace(/\n/g, ' ');
-                const textoBusca = removerAcentos(String(m.titulo || "") + " " + String(m.artista || "") + " " + letraLimpa); 
                 
-                i.setAttribute('data-busca', textoBusca);
+                i.buscaTitulo = tituloLimpo;
+                i.buscaLetra = tituloLimpo + " " + removerAcentos(letraLimpa);
+                
                 i.innerHTML = `${m.titulo}<span class="artista-label">${m.artista}</span>`;
                 
                 if (nome.toUpperCase() === "BASE") {
@@ -1105,10 +1043,7 @@
 
             if (ehElegivelArrastar) {
                 i.setAttribute('data-arrastavel', 'true');
-                if (modoEdicao) {
-                    i.setAttribute('draggable', 'true');
-                }
-                
+                if (modoEdicao) { i.setAttribute('draggable', 'true'); }
                 i.title = isSeparador ? "Ligue o Modo Edição para mover" : "Ligue o Modo Edição para reordenar";
                 
                 i.addEventListener('dragstart', (e) => {
@@ -1116,11 +1051,8 @@
                     itemArrastado = i; i.classList.add('arrastando'); e.dataTransfer.effectAllowed = 'move';
                 });
                 i.addEventListener('dragend', () => {
-                    i.classList.remove('arrastando');
-                    itemArrastado = null;
-                    
+                    i.classList.remove('arrastando'); itemArrastado = null;
                     if (nome.toUpperCase() === "BASE") { recalcularMedleyBase(dM); }
-                    
                     salvarOrdemPasta(nome.toUpperCase(), dM); 
                     atualizarNavegacao(); 
                 });
@@ -1214,9 +1146,7 @@
         
         if (!viaSwipe) {
             fecharAviso(); 
-            if (window.innerWidth <= 850) {
-                fecharMenuMobile();
-            }
+            if (window.innerWidth <= 850) { fecharMenuMobile(); }
         }
         
         atualizarNavegacao();
@@ -1274,6 +1204,9 @@
         let btn = document.getElementById('btnLimparMusica');
         btn.style.display = (termo.length > 0) ? "block" : "none";
         
+        // Pega a opção selecionada (Título ou Letra)
+        let tipoBusca = document.querySelector('input[name="tipoBuscaMusica"]:checked').value;
+        
         let listaTodas = document.getElementById('lista-todas-musicas'); 
         let menu = document.getElementById('menuList'); 
         let msgVazia = document.getElementById('msg-busca-vazia');
@@ -1291,8 +1224,13 @@
         let encontrou = false; 
         const items = document.querySelectorAll('.item-musica:not(.item-separador)');
         for (let i = 0; i < items.length; i++) {
-            let item = items[i]; let texto = item.getAttribute('data-busca');
-            if (texto.includes(termo)) { item.style.display = "block"; encontrou = true; } else { item.style.display = "none"; }
+            let item = items[i]; 
+            
+            // Verifica o escopo da busca
+            let texto = (tipoBusca === "titulo") ? item.buscaTitulo : item.buscaLetra;
+            
+            if (texto && texto.includes(termo)) { item.style.display = "block"; encontrou = true; } 
+            else { item.style.display = "none"; }
         }
         
         if (termo.length > 0 && !encontrou) { 
@@ -1307,7 +1245,6 @@
         atualizarNavegacao();
     }
 
-    /* --- MÁGICA DA V78: PESQUISA MULTI-SITES COM GOOGLE --- */
     function buscarNaWeb(site) {
         if (!navigator.onLine) {
             mostrarAviso("Você está sem internet no momento para buscar fora do aplicativo.");
@@ -1317,13 +1254,9 @@
         let url = '';
         let query = encodeURIComponent(ultimoTermoBuscado);
         
-        if (site === 'cifraclub') {
-            url = `https://www.cifraclub.com.br/?q=${query}`;
-        } else if (site === 'cifras') {
-            url = `https://www.google.com/search?q=${query}+site:cifras.com.br`;
-        } else if (site === 'banana') {
-            url = `https://www.google.com/search?q=${query}+site:bananacifras.com`;
-        }
+        if (site === 'cifraclub') { url = `https://www.cifraclub.com.br/?q=${query}`; } 
+        else if (site === 'cifras') { url = `https://www.google.com/search?q=${query}+site:cifras.com.br`; } 
+        else if (site === 'banana') { url = `https://www.google.com/search?q=${query}+site:bananacifras.com`; }
         
         window.open(url, '_blank');
     }
@@ -1370,9 +1303,7 @@
         atualizarNavegacao();
     }
 
-    function limparBusca(tipo) { 
-        fecharAviso(); 
-    }
+    function limparBusca(tipo) { fecharAviso(); }
 
     window.onload = renderizarMenu;
 
@@ -1390,22 +1321,14 @@
             try {
                 wakeLock = await navigator.wakeLock.request('screen');
                 console.log('Wake Lock ativado: A tela não vai apagar!');
-                wakeLock.addEventListener('release', () => {
-                    console.log('Wake Lock liberado.');
-                });
-            } catch (err) {
-                console.error('Erro no Wake Lock:', err);
-            }
-        } else {
-            console.log('Wake Lock API não suportada neste navegador.');
-        }
+                wakeLock.addEventListener('release', () => { console.log('Wake Lock liberado.'); });
+            } catch (err) { console.error('Erro no Wake Lock:', err); }
+        } else { console.log('Wake Lock API não suportada neste navegador.'); }
     }
 
     document.addEventListener('DOMContentLoaded', ativarTelaSempreLigada);
     document.addEventListener('visibilitychange', async () => {
-        if (wakeLock !== null && document.visibilityState === 'visible') {
-            ativarTelaSempreLigada();
-        }
+        if (wakeLock !== null && document.visibilityState === 'visible') { ativarTelaSempreLigada(); }
     });
 
 </script>
