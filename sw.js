@@ -1,4 +1,4 @@
-const CACHE_NAME = 'repertorio-joao-v17';
+const CACHE_NAME = 'repertorio-joao-v19';
 const urlsToCache = [
   './',
   './index.html',
